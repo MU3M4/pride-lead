@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jua Kali SACCO · Live Prototype · Kiburi → Hekima → Uamuzi</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: Georgia, serif;
+      background: #f8fafc;
+      color: #1c1c1e;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #0b2545;
+      border-bottom: 2px solid #1a4a8a;
+      padding-bottom: 10px;
+      margin-bottom: 4px
+    }
+
+    .sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 18px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden
+    }
+
+    .chdr {
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff
+    }
+
+    .h-k {
+      background: #14532d
+    }
+
+    .h-h {
+      background: #0b2545
+    }
+
+    .h-u {
+      background: #4c1d95
+    }
+
+    .cbdy {
+      padding: 11px 14px;
+      font-size: 12px;
+      color: #374151;
+      line-height: 1.6
+    }
+
+    .cbdy label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      margin: 7px 0 3px
+    }
+
+    .cbdy input,
+    .cbdy select {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: Georgia, serif
+    }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px
+    }
+
+    .fb {
+      flex: 1;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 11px;
+      text-align: center;
+      border: 1px solid transparent;
+      transition: all .3s
+    }
+
+    .fa {
+      font-size: 15px;
+      color: #cbd5e1;
+      flex-shrink: 0
+    }
+
+    .fb-k {
+      background: #dcfce7;
+      border-color: #166534;
+      color: #14532d
+    }
+
+    .fb-h {
+      background: #d6e8ff;
+      border-color: #1a4a8a;
+      color: #0b2545
+    }
+
+    .fb-u {
+      background: #f5f3ff;
+      border-color: #4c1d95;
+      color: #4c1d95
+    }
+
+    .fb-o {
+      background: #fef2f2;
+      border-color: #9a3412;
+      color: #9a3412
+    }
+
+    .fb-act {
+      box-shadow: 0 0 0 2px #f59e0b;
+      transform: scale(1.04)
+    }
+
+    .fb-done {
+      opacity: .55
+    }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px
+    }
+
+    .d-idle {
+      background: #cbd5e1
+    }
+
+    .d-active {
+      background: #f59e0b;
+      animation: p 1s infinite
+    }
+
+    .d-done {
+      background: #22c55e
+    }
+
+    .d-block {
+      background: #ef4444
+    }
+
+    @keyframes p {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px
+    }
+
+    .m {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 9px;
+      text-align: center
+    }
+
+    .mv {
+      font-size: 22px;
+      font-weight: 600;
+      color: #0b2545
+    }
+
+    .ml {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 2px
+    }
+
+    .log {
+      background: #0b2545;
+      border-radius: 10px;
+      padding: 13px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #cbd5e1;
+      height: 200px;
+      overflow-y: auto;
+      margin-bottom: 16px
+    }
+
+    .lg {
+      color: #4ade80
+    }
+
+    .lw {
+      color: #fbbf24
+    }
+
+    .le {
+      color: #f87171
+    }
+
+    .li {
+      color: #93c5fd
+    }
+
+    .lm {
+      color: #c4b5fd
+    }
+
+    .ld {
+      color: #cbd5e1
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 7px;
+      border: none;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all .15s
+    }
+
+    .btn-r {
+      background: #14532d;
+      color: #fff
+    }
+
+    .btn-r:hover {
+      background: #0b2545
+    }
+
+    .btn-x {
+      background: #f1f5f9;
+      color: #374151;
+      border: 1px solid #cbd5e1
+    }
+
+    .btn-x:hover {
+      background: #e2e8f0
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .alert {
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      display: none;
+      margin-bottom: 12px
+    }
+
+    .alert.show {
+      display: block
+    }
+
+    .a-guard {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #9a3412
+    }
+
+    .a-pause {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      color: #b45309
+    }
+
+    .payload {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 11px;
+      font-family: monospace;
+      color: #374151;
+      margin-bottom: 16px;
+      display: none;
+      white-space: pre
+    }
+
+    .payload.show {
+      display: block
+    }
+
+    .sec {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin: 14px 0 7px
+    }
+
+    .brief-out {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 13px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #374151;
+      display: none;
+      margin-bottom: 16px
+    }
+
+    .foot {
+      background: #0b2545;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 11px;
+      color: #93b8e8;
+      margin-top: 18px
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Jua Kali SACCO · Live Prototype</h1>
+  <p class="sub">Kiburi (Credit Scout) → Hekima (Risk Guardian) → Uamuzi (Human Liaison) · Option C: Zapier/n8n-style
+    workflow with PRIDE Loop pause points</p>
+
+  <div class="metrics">
+    <div class="m">
+      <div class="mv" id="m-r">0</div>
+      <div class="ml">Runs</div>
+    </div>
+    <div class="m">
+      <div class="mv" id="m-b">0</div>
+      <div class="ml">GUARD blocks</div>
+    </div>
+    <div class="m">
+      <div class="mv" id="m-a">0</div>
+      <div class="ml">Officer approvals</div>
+    </div>
+    <div class="m">
+      <div class="mv" id="m-t">—</div>
+      <div class="ml">Last run (secs)</div>
+    </div>
+  </div>
+
+  <div class="sec">Workflow Status</div>
+  <div class="flow">
+    <div class="fb fb-k" id="fb-k"><span class="dot d-idle" id="sd-k"></span>Kiburi<br><small>Idle</small></div>
+    <div class="fa">→</div>
+    <div class="fb fb-h" id="fb-h"><span class="dot d-idle" id="sd-h"></span>Hekima<br><small>Idle</small></div>
+    <div class="fa">→</div>
+    <div class="fb fb-u" id="fb-u"><span class="dot d-idle" id="sd-u"></span>Uamuzi<br><small>Idle</small></div>
+    <div class="fa">→</div>
+    <div class="fb fb-o" id="fb-o"><span class="dot d-idle" id="sd-o"></span>Officer<br><small>Pending</small></div>
+  </div>
+
+  <div class="sec">Scenario Configuration</div>
+  <div class="grid">
+    <div class="card">
+      <div class="chdr h-k">Agent 1 · Kiburi Config</div>
+      <div class="cbdy">
+        <label>Member trade type</label>
+        <select id="trade">
+          <option>Food vendor</option>
+          <option>Tailor / seamstress</option>
+          <option>Boda boda operator</option>
+          <option>Metalworker / welder</option>
+        </select>
+        <label>Loan amount (KES)</label>
+        <input type="number" id="amount" value="45000" min="1000" />
+        <label>M-Pesa monthly average (KES)</label>
+        <input type="number" id="mpesa" value="18500" min="0" />
+        <label>Chama membership</label>
+        <select id="chama">
+          <option>Active member (3+ years)</option>
+          <option>Active member (&lt;1 year)</option>
+          <option>No chama membership</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chdr h-h">Agent 2 · Hekima Config</div>
+      <div class="cbdy">
+        <label>SASRA capital adequacy</label>
+        <select id="sasra">
+          <option>Within limits</option>
+          <option>Near limit (warning)</option>
+          <option>Breach — halt required</option>
+        </select>
+        <label>Collateral available</label>
+        <select id="collateral">
+          <option>Chama guarantee</option>
+          <option>Physical asset declared</option>
+          <option>None</option>
+        </select>
+        <label>Kenya DPA consent</label>
+        <select id="dpa">
+          <option>Confirmed (USSD)</option>
+          <option>Pending confirmation</option>
+        </select>
+        <label>Inject gender proxy bias?</label>
+        <select id="bias">
+          <option>No</option>
+          <option>Yes (test GUARD rail)</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="chdr h-u">Agent 3 · Uamuzi Config</div>
+      <div class="cbdy">
+        <label>Briefing language</label>
+        <select id="lang">
+          <option>Swahili</option>
+          <option>Dholuo</option>
+          <option>English</option>
+        </select>
+        <label>Delivery channel</label>
+        <select id="chan">
+          <option>Dashboard + WhatsApp</option>
+          <option>USSD only (*483*0#)</option>
+          <option>Dashboard only</option>
+        </select>
+        <label>Officer decision</label>
+        <select id="dec">
+          <option>Approve full amount</option>
+          <option>Approve counter-offer</option>
+          <option>Decline with appeal pathway</option>
+        </select>
+        <label>SLA target (minutes)</label>
+        <input type="number" id="sla" value="20" min="1" />
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <button class="btn btn-r" id="btn-run" onclick="run()">▶ Run Workflow</button>
+    <button class="btn btn-x" onclick="reset()">↺ Reset</button>
+  </div>
+
+  <div class="alert a-guard" id="a-guard">🛡 GUARD RAIL TRIGGERED — Gender proxy bias detected in Kiburi scoring
+    payload. Application blocked. Incident logged for TRACK audit. Workflow halted. Ethics Committee notified.</div>
+  <div class="alert a-pause" id="a-pause">⏸ PRIDE LOOP PAUSE — SASRA capital adequacy flag detected by Hekima. Workflow
+    paused. Ethics Committee must review before Uamuzi generates briefing. Member notified of delay via USSD.</div>
+
+  <div class="sec">Live Payload (JSON)</div>
+  <div class="payload" id="payload"></div>
+
+  <div class="sec">Execution Log</div>
+  <div class="log" id="log"></div>
+
+  <div class="sec" id="bhead" style="display:none">Uamuzi Briefing Generated</div>
+  <div class="brief-out" id="brief"></div>
+
+  <div class="foot">All data stored on AWS af-south-1 (Cape Town) · Kenya DPA 2019 compliant · SASRA audit trail active
+    · Kill switch: USSD *483*0#</div>
+
+  <script>
+    let runs = 0, blocks = 0, approvals = 0;
+
+    function log(msg, cls = 'ld') {
+      const el = document.getElementById('log');
+      el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+    function setFlow(id, status, sub) {
+      const b = document.getElementById('fb-' + id), d = document.getElementById('sd-' + id);
+      d.className = 'dot d-' + status;
+      b.querySelector('small').textContent = sub;
+      if (status === 'active') b.classList.add('fb-act'); else b.classList.remove('fb-act');
+      if (status === 'done') b.classList.add('fb-done');
+    }
+    const delay = ms => new Promise(r => setTimeout(r, ms));
+
+    function reset() {
+      ['k', 'h', 'u', 'o'].forEach(a => setFlow(a, 'idle', 'Idle'));
+      document.getElementById('a-guard').classList.remove('show');
+      document.getElementById('a-pause').classList.remove('show');
+      document.getElementById('payload').classList.remove('show');
+      document.getElementById('brief').style.display = 'none';
+      document.getElementById('bhead').style.display = 'none';
+      document.getElementById('log').innerHTML = '';
+      document.getElementById('btn-run').disabled = false;
+      document.getElementById('m-t').textContent = '—';
+    }
+
+    async function run() {
+      const btn = document.getElementById('btn-run');
+      btn.disabled = true; reset();
+      const t0 = Date.now(); runs++;
+      document.getElementById('m-r').textContent = runs;
+
+      const trade = document.getElementById('trade').value;
+      const amount = parseInt(document.getElementById('amount').value) || 45000;
+      const mpesa = parseInt(document.getElementById('mpesa').value) || 0;
+      const chama = document.getElementById('chama').value;
+      const sasra = document.getElementById('sasra').value;
+      const collateral = document.getElementById('collateral').value;
+      const dpa = document.getElementById('dpa').value;
+      const biasOn = document.getElementById('bias').value.includes('Yes');
+      const lang = document.getElementById('lang').value;
+      const chan = document.getElementById('chan').value;
+      const dec = document.getElementById('dec').value;
+      const sla = parseInt(document.getElementById('sla').value) || 20;
+
+      log('=== WORKFLOW INITIATED ===', 'lm');
+      log(`Scenario: ${trade} · KES ${amount.toLocaleString()} loan · M-Pesa avg KES ${mpesa.toLocaleString()}/mo`, 'li');
+
+      // KIBURI
+      await delay(600);
+      setFlow('k', 'active', 'Scoring...');
+      log('--- STEP 1: Kiburi (Credit Scout) ---', 'lm');
+      log('[Kiburi] Querying M-Pesa transaction API (Safaricom)...', 'lg');
+      await delay(500);
+      log('[Kiburi] Loading chama savings records...', 'lg');
+      await delay(400);
+
+      const scoreRaw = Math.min(100, Math.round((mpesa / amount) * 40 + (chama.includes('3+') ? 35 : chama.includes('<1') ? 18 : 0) + Math.random() * 15));
+      const tier = scoreRaw >= 70 ? 'Low Risk' : scoreRaw >= 50 ? 'Medium Risk' : 'High Risk';
+      const tierColor = scoreRaw >= 70 ? 'lg' : scoreRaw >= 50 ? 'lw' : 'le';
+      log(`[Kiburi] Alternative credit score: ${scoreRaw}/100 · Risk tier: ${tier}`, tierColor);
+
+      const smsAllowed = Math.min(3, Math.floor(Math.random() * 3) + 1);
+      log(`[Kiburi] Member notification dispatched via Africa's Talking (${smsAllowed}/3 daily cap)`, 'lg');
+      log('[Kiburi] Payload sealed → forwarding to Hekima', 'lg');
+      setFlow('k', 'done', 'Complete');
+
+      // GUARD CHECK
+      await delay(300);
+      if (biasOn) {
+        log('[GUARD] ⛔ Gender proxy field detected in Kiburi scoring payload', 'le');
+        log('[GUARD] Payload BLOCKED · Incident logged for TRACK audit · Ethics Committee notified', 'le');
+        blocks++; document.getElementById('m-b').textContent = blocks;
+        document.getElementById('a-guard').classList.add('show');
+        document.getElementById('payload').textContent = JSON.stringify({ agent: 'Kiburi', GUARD_BLOCK: true, reason: 'Gender proxy in scoring field', incident_id: 'TRK-' + Date.now() }, null, 2);
+        document.getElementById('payload').classList.add('show');
+        setFlow('h', 'active', 'BLOCKED');
+        log('=== WORKFLOW HALTED BY GUARD RAIL ===', 'le');
+        document.getElementById('m-t').textContent = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+        btn.disabled = false; return;
+      }
+
+      // HEKIMA
+      await delay(600);
+      setFlow('h', 'active', 'Validating...');
+      log('--- STEP 2: Hekima (Risk Guardian) ---', 'lm');
+      log('[Hekima] Cross-checking SACCO bylaw database...', 'li');
+      await delay(400);
+      log(`[Hekima] SASRA capital adequacy check: ${sasra}`, 'li');
+      await delay(400);
+      log(`[Hekima] Collateral verification: ${collateral}`, 'li');
+      log(`[Hekima] Kenya DPA 2019 consent status: ${dpa}`, 'li');
+
+      const sasraBreach = sasra.includes('Breach');
+      const dpaIssue = dpa.includes('Pending');
+      const needsPause = sasraBreach || dpaIssue;
+
+      if (sasraBreach) log('[Hekima] ⚠ SASRA capital adequacy BREACH → PRIDE LOOP PAUSE triggered', 'lw');
+      if (dpaIssue) log('[Hekima] ⚠ Kenya DPA consent pending → PRIDE LOOP PAUSE triggered', 'lw');
+      if (!needsPause) log('[Hekima] All compliance checks passed ✓', 'lg');
+
+      const maxLoan = Math.round(mpesa * 2.2 * (scoreRaw / 100));
+      const recommended = Math.min(amount, maxLoan);
+      log(`[Hekima] Recommended loan ceiling: KES ${recommended.toLocaleString()} · Requested: KES ${amount.toLocaleString()}`, 'li');
+
+      const hPayload = {
+        agent: 'Hekima', step: 2, trade, amount_requested: amount, amount_recommended: recommended,
+        score: scoreRaw, risk_tier: tier, sasra_status: sasra, collateral, dpa_consent: dpa,
+        pride_pause: needsPause, data_region: 'AWS-af-south-1', dpa_compliant: !dpaIssue
+      };
+
+      if (needsPause) {
+        document.getElementById('a-pause').classList.add('show');
+        log('[Hekima] Workflow PAUSED · Member notified via USSD · Ethics Committee alerted', 'lw');
+      }
+
+      log('[Hekima] Payload enriched → forwarding to Uamuzi', 'li');
+      setFlow('h', 'done', 'Complete');
+
+      // UAMUZI
+      await delay(700);
+      setFlow('u', 'active', 'Drafting...');
+      log('--- STEP 3: Uamuzi (Human Liaison) ---', 'lm');
+      log(`[Uamuzi] Generating briefing in ${lang} via Claude claude-sonnet-4...`, 'lm');
+      await delay(600);
+      log(`[Uamuzi] Dispatching via ${chan}...`, 'lm');
+
+      const fullPayload = { ...hPayload, agent: 'Uamuzi', step: 3, lang, channel: chan, pride_pause_active: needsPause };
+      document.getElementById('payload').textContent = JSON.stringify(fullPayload, null, 2);
+      document.getElementById('payload').classList.add('show');
+
+      const langGreet = lang === 'Swahili' ? 'Habari' : lang === 'Dholuo' ? 'Ber ahinya' : 'Hello';
+      const appealLine = dec.includes('Decline') ? '\nAPPEAL PATHWAY: Member may request review via USSD *483*0#APPEAL within 14 days.' : '';
+      const pauseNote = needsPause ? `\n⏸ NOTE: ${sasraBreach ? 'SASRA capital adequacy review in progress.' : 'Kenya DPA consent required before final decision.'}\n` : '';
+
+      const briefing = `JUA KALI SACCO — LOAN DECISION BRIEFING
+${langGreet}! Language: ${lang} · Channel: ${chan}
+Generated: ${new Date().toLocaleString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MEMBER APPLICATION
+  Trade type:       ${trade}
+  Loan requested:   KES ${amount.toLocaleString()}
+  Recommended max:  KES ${recommended.toLocaleString()}${amount > recommended ? ' ← counter-offer suggested' : ''}
+
+KIBURI CREDIT SIGNAL
+  Alt. credit score:  ${scoreRaw}/100
+  Risk tier:          ${tier}
+  M-Pesa avg/month:   KES ${mpesa.toLocaleString()}
+  Chama status:       ${chama}
+
+HEKIMA COMPLIANCE CHECK
+  SASRA status:     ${sasra}
+  Collateral:       ${collateral}
+  DPA 2019 consent: ${dpa}
+  ${needsPause ? '⚠ PAUSE ACTIVE — see note below' : '✓ All checks passed'}
+${pauseNote}
+OFFICER ACTION REQUIRED
+  Decision:         ${dec}
+  SLA target:       ${sla} minutes
+  ${dec.includes('counter') ? `Counter-offer amount: KES ${recommended.toLocaleString()}` : ''}
+${appealLine}
+DATA GOVERNANCE
+  Storage:          AWS af-south-1 (Cape Town)
+  Kenya DPA 2019:   ${dpaIssue ? 'Consent pending' : 'Compliant'}
+  PII visible to:   Jua Kali SACCO vetted staff only
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Member can withdraw consent: USSD *483*0#WITHDRAW
+Explanation (Dholuo/Swahili): USSD *483*0#EXPLAIN`;
+
+      log(`[Uamuzi] Briefing generated (${briefing.length} chars · ${lang})`, 'lm');
+      setFlow('u', 'done', 'Briefing sent');
+
+      document.getElementById('bhead').style.display = 'block';
+      const bEl = document.getElementById('brief');
+      bEl.style.display = 'block';
+      bEl.innerHTML = `<pre style="font-family:monospace;font-size:11px;white-space:pre-wrap">${briefing}</pre>`;
+
+      // OFFICER
+      await delay(700);
+      setFlow('o', 'active', 'Reviewing...');
+      log('--- STEP 4: Licensed Loan Officer ---', 'lw');
+      log(`[Officer] Briefing received via ${chan}`, 'lw');
+      await delay(500);
+      log(`[Officer] Decision: ${dec}`, 'lw');
+
+      const decTime = (Math.random() * sla * 0.75 + sla * 0.1).toFixed(1);
+      const withinSLA = parseFloat(decTime) < sla;
+      log(`[Officer] Decision time: ${decTime} min (SLA: ${sla} min) ${withinSLA ? '✅ Within SLA' : '⚠ SLA exceeded'}`, 'lw');
+      log(`[Officer] Logged: officer_id=LO_KSM_007 · timestamp=${new Date().toISOString()} · action="${dec}"`, 'lw');
+
+      approvals++;
+      document.getElementById('m-a').textContent = approvals;
+      setFlow('o', 'done', dec.split(' ')[0]);
+
+      // PRIDE LOOP
+      log('--- PRIDE Loop closes ---', 'lm');
+      log('[CYCLE] Kiburi: logging score-to-approval conversion for TRACK quarterly report', 'lg');
+      log('[CYCLE] Hekima: archiving anonymised loan outcome to AWS af-south-1', 'li');
+      log('[CYCLE] Uamuzi: logging officer decision latency · ' + decTime + ' min', 'lm');
+      log('[TRACK] SASRA audit trail updated · Quarterly report queue: +1', 'li');
+      if (!withinSLA) log('[TRACK] ⚠ SLA breach flagged for Ethics Committee review', 'lw');
+      log('=== WORKFLOW COMPLETE ===', 'lm');
+
+      document.getElementById('m-t').textContent = ((Date.now() - t0) / 1000).toFixed(1) + 's';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+
+</html>
