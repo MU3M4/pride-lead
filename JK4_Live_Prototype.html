@@ -398,18 +398,18 @@
     <div class="card">
       <div class="chdr h-k">Agent 1 · Kiburi Config</div>
       <div class="cbdy">
-        <label>Member trade type</label>
+        <label for="trade">Member trade type</label>
         <select id="trade">
           <option>Food vendor</option>
           <option>Tailor / seamstress</option>
           <option>Boda boda operator</option>
           <option>Metalworker / welder</option>
         </select>
-        <label>Loan amount (KES)</label>
+        <label for="amount">Loan amount (KES)</label>
         <input type="number" id="amount" value="45000" min="1000" />
-        <label>M-Pesa monthly average (KES)</label>
+        <label for="mpesa">M-Pesa monthly average (KES)</label>
         <input type="number" id="mpesa" value="18500" min="0" />
-        <label>Chama membership</label>
+        <label for="chama">Chama membership</label>
         <select id="chama">
           <option>Active member (3+ years)</option>
           <option>Active member (&lt;1 year)</option>
@@ -420,24 +420,24 @@
     <div class="card">
       <div class="chdr h-h">Agent 2 · Hekima Config</div>
       <div class="cbdy">
-        <label>SASRA capital adequacy</label>
+        <label for="sasra">SASRA capital adequacy</label>
         <select id="sasra">
           <option>Within limits</option>
           <option>Near limit (warning)</option>
           <option>Breach — halt required</option>
         </select>
-        <label>Collateral available</label>
+        <label for="collateral">Collateral available</label>
         <select id="collateral">
           <option>Chama guarantee</option>
           <option>Physical asset declared</option>
           <option>None</option>
         </select>
-        <label>Kenya DPA consent</label>
+        <label for="dpa">Kenya DPA consent</label>
         <select id="dpa">
           <option>Confirmed (USSD)</option>
           <option>Pending confirmation</option>
         </select>
-        <label>Inject gender proxy bias?</label>
+        <label for="bias">Inject gender proxy bias?</label>
         <select id="bias">
           <option>No</option>
           <option>Yes (test GUARD rail)</option>
@@ -447,25 +447,25 @@
     <div class="card">
       <div class="chdr h-u">Agent 3 · Uamuzi Config</div>
       <div class="cbdy">
-        <label>Briefing language</label>
+        <label for="lang">Briefing language</label>
         <select id="lang">
           <option>Swahili</option>
           <option>Dholuo</option>
           <option>English</option>
         </select>
-        <label>Delivery channel</label>
+        <label for="chan">Delivery channel</label>
         <select id="chan">
           <option>Dashboard + WhatsApp</option>
           <option>USSD only (*483*0#)</option>
           <option>Dashboard only</option>
         </select>
-        <label>Officer decision</label>
+        <label for="dec">Officer decision</label>
         <select id="dec">
           <option>Approve full amount</option>
           <option>Approve counter-offer</option>
           <option>Decline with appeal pathway</option>
         </select>
-        <label>SLA target (minutes)</label>
+        <label for="sla">SLA target (minutes)</label>
         <input type="number" id="sla" value="20" min="1" />
       </div>
     </div>
