@@ -3,1660 +3,420 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PRIDE Lead · Ethical Credit Marketplace for Kenya</title>
-  <meta name="description" content="Multi-agent ethical credit decisioning linking Kenyan borrowers to financiers. KYC, CRB, cashflow-first underwriting, escrow. Kiburi → Hekima → Uamuzi + Human Officer." />
+  <title>PRIDE Lead · Ethical loan decisioning</title>
+  <meta name="description" content="Simple multi-agent credit decisioning for Kenya. See how Kiburi, Hekima and Uamuzi reason. Human officer decides." />
   <style>
     :root {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --border: #e2e8f0;
-      --k: #14532d;
-      --k-bg: #dcfce7;
-      --h: #0b2545;
-      --h-bg: #dbeafe;
-      --u: #4c1d95;
-      --u-bg: #f3e8ff;
-      --o: #9a3412;
-      --o-bg: #fef2f2;
-      --accent: #0f766e;
-      --warn: #b45309;
-      --danger: #b91c1c;
-      --ok: #15803d;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.04);
+      --bg: #f1f5f9; --card: #fff; --ink: #0f172a; --muted: #64748b; --border: #e2e8f0;
+      --h: #0b2545; --accent: #0f766e; --ok: #15803d; --warn: #b45309; --danger: #b91c1c;
+      --k: #14532d; --kbg: #dcfce7; --hbg: #dbeafe; --ubg: #f3e8ff; --obg: #fef2f2;
+      --radius: 12px; --shadow: 0 1px 3px rgba(15,23,42,.08), 0 4px 12px rgba(15,23,42,.04);
+    }
+    body.night {
+      --bg: #0f172a; --card: #1e293b; --ink: #e2e8f0; --muted: #94a3b8; --border: #334155;
+      --kbg: #14532d; --hbg: #1e3a5f; --ubg: #3b0764; --obg: #7c2d12;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      line-height: 1.5;
-      padding: 0 0 64px;
-      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--ink); line-height: 1.5; min-height: 100vh; padding-bottom: 48px;
     }
-    .hero {
-      background: linear-gradient(135deg, #0b2545 0%, #14532d 100%);
-      color: #fff;
-      padding: 28px 20px 36px;
+    .top {
+      background: linear-gradient(135deg, #0b2545, #14532d); color: #fff; padding: 20px 16px 24px;
     }
-    .hero-inner { max-width: 1120px; margin: 0 auto; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-      border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 600;
-      letter-spacing: .04em; text-transform: uppercase; margin-bottom: 12px;
+    body.night .top { background: linear-gradient(135deg, #020617, #14532d); }
+    .top-inner { max-width: 720px; margin: 0 auto; }
+    .top h1 { font-size: 1.35rem; font-weight: 700; margin-bottom: 4px; }
+    .top p { font-size: 13px; opacity: .9; }
+    .top-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+    .chip {
+      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
+      border-radius: 999px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; color: #fff;
     }
-    .hero h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 700; letter-spacing: -.02em; margin-bottom: 8px; }
-    .hero .tagline { font-size: 14px; opacity: .92; max-width: 720px; margin-bottom: 16px; }
-    .hero-points { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 12px; opacity: .88; }
-    .hero-points span { display: flex; align-items: center; gap: 5px; }
-    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-    .metrics {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-      margin: -22px 0 22px; position: relative; z-index: 2;
+    .chip.on { background: #fff; color: #0b2545; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
+    .steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .step-pill {
+      font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 999px;
+      background: var(--card); border: 1px solid var(--border); color: var(--muted);
     }
-    .metric {
-      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 14px 12px; text-align: center; box-shadow: var(--shadow);
-    }
-    .metric .val { font-size: 24px; font-weight: 700; color: var(--h); line-height: 1.1; }
-    .metric .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
-    .sec-label {
-      font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
-      letter-spacing: .06em; margin: 22px 0 10px;
-    }
-    .tabs {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
-    }
-    .tab {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
-      transition: all .15s;
-    }
-    .tab:hover { border-color: var(--accent); }
-    .tab.active { background: var(--h); color: #fff; border-color: var(--h); }
-    .panel { display: none; }
-    .panel.active { display: block; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+    .step-pill.on { background: var(--h); color: #fff; border-color: var(--h); }
+    .step-pill.done { background: var(--kbg); color: var(--k); border-color: #86efac; }
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-      box-shadow: var(--shadow); overflow: hidden;
+      box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px;
     }
-    .chdr {
-      padding: 10px 14px; font-size: 12px; font-weight: 700; letter-spacing: .02em;
-      border-bottom: 1px solid var(--border);
-    }
-    .h-k { background: var(--k-bg); color: var(--k); }
-    .h-h { background: var(--h-bg); color: var(--h); }
-    .h-u { background: var(--u-bg); color: var(--u); }
-    .h-o { background: var(--o-bg); color: var(--o); }
-    .h-m { background: #ecfdf5; color: #065f46; }
-    .h-f { background: #fef3c7; color: #92400e; }
-    .cbdy { padding: 12px 14px; }
+    .card h2 { font-size: 15px; margin-bottom: 8px; color: var(--h); }
+    body.night .card h2 { color: #93c5fd; }
     label {
       display: block; font-size: 11px; font-weight: 600; color: var(--muted);
-      margin: 8px 0 4px; text-transform: uppercase; letter-spacing: .03em;
+      text-transform: uppercase; letter-spacing: .03em; margin: 10px 0 4px;
     }
     label:first-child { margin-top: 0; }
     input, select, textarea {
-      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
-      border-radius: 8px; font-size: 13px; background: #fff; color: var(--ink);
+      width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 14px; background: var(--bg); color: var(--ink);
     }
-    textarea { min-height: 64px; resize: vertical; }
-    input:focus, select:focus, textarea:focus {
-      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15,118,110,.12);
-    }
+    body.night input, body.night select, body.night textarea { background: #0f172a; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .badge {
-      display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
-      border-radius: 999px; text-transform: uppercase; letter-spacing: .04em;
-    }
-    .b-ok { background: #dcfce7; color: #166534; }
-    .b-warn { background: #fef3c7; color: #92400e; }
-    .b-danger { background: #fee2e2; color: #991b1b; }
-    .b-info { background: #dbeafe; color: #1e40af; }
-    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-    .preset {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
-    }
-    .preset:hover { border-color: var(--accent); }
-    .preset.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .flow {
-      display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
-    }
-    .fb {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px 12px; font-size: 12px; font-weight: 600; min-width: 90px; text-align: center;
-    }
-    .fb small { display: block; font-weight: 500; color: var(--muted); margin-top: 2px; }
-    .fa { color: var(--muted); font-weight: 700; }
-    .dot {
-      display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px;
-    }
-    .d-idle { background: #cbd5e1; }
-    .d-active { background: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.25); }
-    .d-done { background: #22c55e; }
-    .d-fail { background: #ef4444; }
-    .fb-act { border-color: #0ea5e9; }
-    .fb-done { border-color: #22c55e; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
     .btn {
-      border: none; border-radius: 8px; padding: 10px 16px; font-size: 13px;
-      font-weight: 700; cursor: pointer; transition: all .15s;
+      border: none; border-radius: 8px; padding: 11px 16px; font-size: 14px; font-weight: 700;
+      cursor: pointer; margin-top: 12px; margin-right: 8px;
     }
     .btn-primary { background: var(--h); color: #fff; }
-    .btn-primary:hover { background: #0a1c33; }
-    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-secondary { background: #fff; border: 1px solid var(--border); color: var(--ink); }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--ink); }
     .btn-ok { background: var(--ok); color: #fff; }
     .btn-warn { background: var(--warn); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
-    .score-card {
-      display: none; background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; margin: 12px 0; box-shadow: var(--shadow);
+    .check { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; font-size: 13px; }
+    .check input { width: auto; margin-top: 3px; }
+    .terms {
+      font-size: 12px; max-height: 160px; overflow-y: auto; padding: 10px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0;
     }
-    .score-card.show { display: block; }
-    .score-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
-    .gauge-wrap { width: 90px; height: 90px; position: relative; }
-    .gauge-wrap svg { transform: rotate(-90deg); }
-    .gauge-center {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; font-weight: 800; font-size: 22px;
+    .hidden { display: none !important; }
+    .agent-block {
+      border-left: 4px solid var(--accent); padding: 10px 12px; margin: 10px 0;
+      background: var(--bg); border-radius: 0 8px 8px 0; font-size: 13px;
     }
-    .gauge-center small { font-size: 10px; font-weight: 600; color: var(--muted); }
-    .score-details { flex: 1; min-width: 200px; }
-    .score-details h3 { font-size: 14px; margin-bottom: 6px; }
-    .score-details .bd { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 12px; }
-    .log {
-      background: #0f172a; color: #e2e8f0; border-radius: var(--radius);
-      padding: 12px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 11px; max-height: 280px; overflow-y: auto; margin-top: 10px;
-    }
-    .log .lm { color: #93c5fd; }
-    .log .lg { color: #86efac; }
-    .log .lw { color: #fcd34d; }
-    .log .le { color: #fca5a5; }
-    .log .li { color: #cbd5e1; }
-    .alert {
-      display: none; padding: 12px 14px; border-radius: 10px; margin: 10px 0;
-      font-size: 13px; font-weight: 600;
-    }
-    .alert.show { display: block; }
-    .a-guard { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-    .a-pause { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-    .a-ok { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .brief, .payload {
-      display: none; background: #f8fafc; border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px; font-size: 13px; white-space: pre-wrap;
-      margin-top: 10px;
-    }
-    .brief.show, .payload.show { display: block; }
-    .officer-panel {
-      display: none; background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px; margin-top: 12px; box-shadow: var(--shadow);
-    }
-    .officer-panel.show { display: block; }
-    .obtn { margin-right: 6px; margin-bottom: 6px; }
-    .how {
-      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-      margin: 12px 0; box-shadow: var(--shadow);
-    }
-    .how summary {
-      padding: 12px 14px; cursor: pointer; font-weight: 700; font-size: 13px;
-      list-style: none;
-    }
-    .how-body { padding: 0 14px 14px; font-size: 13px; color: var(--muted); }
-    .how-agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
-    .how-agent { border-left: 3px solid var(--accent); padding-left: 10px; }
-    .how-agent.k { border-color: var(--k); }
-    .how-agent.h { border-color: var(--h); }
-    .how-agent.u { border-color: var(--u); }
-    .fee-box {
-      background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
-      border: 1px solid #a7f3d0; border-radius: 10px; padding: 12px 14px;
-      font-size: 13px; margin: 10px 0;
-    }
-    .flag-list { margin: 8px 0; padding-left: 18px; font-size: 12px; }
-    .flag-list li { margin: 4px 0; }
-    .photo-box {
-      border: 2px dashed var(--border); border-radius: 10px; padding: 16px;
-      text-align: center; color: var(--muted); font-size: 12px; background: #f8fafc;
-    }
-    .required::after { content: " *"; color: var(--danger); }
-    .section-title {
-      font-size: 15px; font-weight: 700; margin: 16px 0 8px; color: var(--h);
-      border-bottom: 2px solid var(--border); padding-bottom: 6px;
-    }
-
-    /* Dark / night mode */
-    body.night {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --ink: #e2e8f0;
-      --muted: #94a3b8;
-      --border: #334155;
-      --k-bg: #14532d;
-      --h-bg: #1e3a5f;
-      --u-bg: #3b0764;
-      --o-bg: #7c2d12;
-      --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.25);
-    }
-    body.night .hero {
-      background: linear-gradient(135deg, #020617 0%, #14532d 100%);
-    }
-    body.night input, body.night select, body.night textarea {
-      background: #0f172a; color: #e2e8f0; border-color: #334155;
-    }
-    body.night .log { background: #020617; }
-    body.night .photo-box { background: #0f172a; }
-    body.night .brief, body.night .payload { background: #0f172a; }
-    body.night .fee-box { background: linear-gradient(135deg, #064e3b, #14532d); border-color: #166534; color: #d1fae5; }
-    body.night .tab.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-    body.night .btn-secondary { background: #1e293b; color: #e2e8f0; }
-    .theme-toggle {
-      position: fixed; top: 12px; right: 12px; z-index: 50;
-      background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
-      color: #fff; border-radius: 999px; padding: 8px 14px; font-size: 12px;
-      font-weight: 700; cursor: pointer; backdrop-filter: blur(6px);
-    }
-    body.night .theme-toggle { background: rgba(15,23,42,.8); border-color: #475569; }
-    .consent-box {
-      background: #f8fafc; border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 14px; font-size: 12px; max-height: 180px; overflow-y: auto; margin: 8px 0;
-    }
-    body.night .consent-box { background: #0f172a; }
-    .consent-check { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; font-size: 13px; }
-    .consent-check input { width: auto; margin-top: 3px; }
-    .workshop-card, .invest-card {
-      border-left: 3px solid var(--accent); padding: 10px 12px; margin: 8px 0;
-      background: var(--card); border-radius: 0 8px 8px 0; font-size: 13px;
-    }
-
-    .lang-bar {
-      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
-      margin: 10px 0 0;
-    }
-    .lang-btn {
-      background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
-      color: #fff; border-radius: 6px; padding: 4px 10px; font-size: 11px;
-      font-weight: 700; cursor: pointer;
-    }
-    .lang-btn.on { background: #fff; color: #0b2545; }
-    body.night .lang-btn.on { background: #38bdf8; color: #0f172a; }
-    .sandbox-flag {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #fef3c7; color: #92400e; border: 1px solid #fde68a;
-      border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700;
-    }
-    body.night .sandbox-flag { background: #78350f; color: #fde68a; border-color: #92400e; }
-    .status-track {
-      display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 12px 0;
-    }
-    .st-step {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 10px; font-size: 11px; font-weight: 600; min-width: 70px; text-align: center;
-    }
-    .st-step.on { border-color: var(--accent); background: #ecfdf5; color: #065f46; }
-    body.night .st-step.on { background: #064e3b; color: #a7f3d0; }
-    .st-step.done { border-color: #22c55e; }
-    .st-arrow { color: var(--muted); font-weight: 700; }
-    .doc-check { font-size: 12px; margin: 4px 0; }
-    .doc-check.miss { color: var(--danger); }
-    .doc-check.ok { color: var(--ok); }
-    .fee-calc {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px; font-size: 13px; margin: 10px 0;
-    }
-    .fee-calc .row { display: flex; justify-content: space-between; margin: 4px 0; }
-    .fee-calc .total { font-weight: 700; border-top: 1px solid var(--border); padding-top: 6px; margin-top: 6px; }
-    @media (max-width: 700px) {
-      .metrics { grid-template-columns: repeat(2, 1fr); }
-      .row2 { grid-template-columns: 1fr; }
-    }
+    .agent-block.k { border-color: var(--k); background: var(--kbg); }
+    .agent-block.h { border-color: #1d4ed8; background: var(--hbg); }
+    .agent-block.u { border-color: #7c3aed; background: var(--ubg); }
+    .agent-block.o { border-color: #c2410c; background: var(--obg); }
+    .agent-block h3 { font-size: 13px; margin-bottom: 4px; }
+    .agent-block .think { color: var(--ink); white-space: pre-wrap; }
+    .score-big { font-size: 28px; font-weight: 800; }
+    .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; font-size: 12px; font-weight: 600; }
+    .flow span { padding: 4px 8px; border-radius: 6px; background: var(--border); color: var(--muted); }
+    .flow span.on { background: #0ea5e9; color: #fff; }
+    .flow span.done { background: #22c55e; color: #fff; }
+    .flow span.fail { background: #ef4444; color: #fff; }
   </style>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <div class="hero-badge">Live Prototype · Credit Marketplace · Cashflow-first</div>
-      <h1>PRIDE Lead — Ethical Credit Marketplace</h1>
-      <p class="tagline">
-        Link Kenyan borrowers to financiers with multi-agent underwriting.
-        KYC · CRB · cashflow analysis · escrow. Kiburi scores, Hekima guards compliance,
-        Uamuzi briefs the officer — human always decides.
-      </p>
-      <div class="hero-points">
-        <span>✓ KYC + CRB</span>
-        <span>✓ Cashflow over collateral</span>
-        <span>✓ Pochi / Till / Bank primary</span>
-        <span>✓ Escrow · 5% + 5% fee</span>
-        <span>✓ Briefcase-company controls</span>
-      </div>
-      <div class="lang-bar">
-        <span class="sandbox-flag" data-i18n="sandbox">🧪 SANDBOX · Demo only — not live lending</span>
-        <button type="button" class="lang-btn on" id="lang-en" onclick="setUILang('en')">English</button>
-        <button type="button" class="lang-btn" id="lang-sw" onclick="setUILang('sw')">Kiswahili</button>
+  <div class="top">
+    <div class="top-inner">
+      <h1 id="t-title">PRIDE Lead</h1>
+      <p id="t-sub">Ethical loan decisioning — see how the AI agents reason. A human officer always decides.</p>
+      <div class="top-actions">
+        <button type="button" class="chip on" id="btn-en" onclick="setLang('en')">English</button>
+        <button type="button" class="chip" id="btn-sw" onclick="setLang('sw')">Kiswahili</button>
+        <button type="button" class="chip" id="btn-night" onclick="toggleNight()">Night</button>
       </div>
     </div>
-  </header>
+  </div>
 
   <div class="wrap">
-    <div class="metrics">
-      <div class="metric"><div class="val" id="m-r">0</div><div class="lbl">Runs</div></div>
-      <div class="metric"><div class="val" id="m-b">0</div><div class="lbl">GUARD / CRB blocks</div></div>
-      <div class="metric"><div class="val" id="m-a">0</div><div class="lbl">Officer decisions</div></div>
-      <div class="metric"><div class="val" id="m-t">—</div><div class="lbl">Last run (s)</div></div>
+    <div class="steps" id="step-pills">
+      <span class="step-pill on" id="pill-1">1. Terms</span>
+      <span class="step-pill" id="pill-2">2. Sign up</span>
+      <span class="step-pill" id="pill-3">3. Your details</span>
+      <span class="step-pill" id="pill-4">4. Agent reasoning</span>
     </div>
 
-    <details class="how">
-      <summary>How PRIDE Lead works · Marketplace model</summary>
-      <div class="how-body">
-        <p>
-          PRIDE Lead connects borrowers who need credit to licensed financiers.
-          Funds move through an <strong>escrow account</strong>. Platform fee:
-          <strong>5% from the borrower</strong> and <strong>5% from the financier</strong>
-          on successful disbursement. Underwriting is <strong>cashflow-first</strong> —
-          we do not lend primarily on the strength of security.
-        </p>
-        <div class="how-agents">
-          <div class="how-agent k">
-            <strong>Kiburi — Credit Scout</strong>
-            Scores using Pochi la Biashara, Till, Bank, Paybill (primary) and M-Pesa (secondary).
-            Flags M-Pesa outliers. Runs conversion / cashflow analysis.
-          </div>
-          <div class="how-agent h">
-            <strong>Hekima — Risk Guardian</strong>
-            SASRA, Kenya DPA 2019, CRB, bias GUARD, briefcase-company checks, KYC completeness.
-          </div>
-          <div class="how-agent u">
-            <strong>Uamuzi — Human Liaison</strong>
-            Officer briefing in English / Swahili / Dholuo. Final decision stays with the licensed officer.
-          </div>
-        </div>
-        <p style="margin-top:12px;font-size:12px" data-i18n="offline_note">
-          <strong>Low-data / offline:</strong> Core forms work on slow networks. Production roadmap includes USSD for feature phones and offline draft save.
-        </p>
+    <section id="step-1" class="card">
+      <h2 id="h-terms">Terms &amp; consent</h2>
+      <div class="terms" id="terms-box"></div>
+      <div class="check">
+        <input type="checkbox" id="agree" />
+        <label for="agree" style="text-transform:none;font-weight:500;margin:0" id="lbl-agree">I have read and agree to the terms. I consent to my details being used for this demo assessment.</label>
       </div>
-    </details>
+      <button type="button" class="btn btn-primary" id="btn-next1" onclick="goStep(2)" disabled>Continue</button>
+    </section>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="intake" onclick="switchTab('intake')" data-i18n="tab1">1. KYC &amp; Application</button>
-      <button class="tab" data-tab="finance" onclick="switchTab('finance')" data-i18n="tab2">2. Financials</button>
-      <button class="tab" data-tab="consent" onclick="switchTab('consent')" data-i18n="tab3">3. Consent &amp; T&amp;Cs</button>
-      <button class="tab" data-tab="agents" onclick="switchTab('agents')" data-i18n="tab4">4. Agent Decisioning</button>
-      <button class="tab" data-tab="market" onclick="switchTab('market')" data-i18n="tab5">5. Marketplace &amp; Escrow</button>
-      <button class="tab" data-tab="status" onclick="switchTab('status')" data-i18n="tab6">6. Status &amp; Appeal</button>
-      <button class="tab" data-tab="financier" onclick="switchTab('financier')" data-i18n="tab7">7. Financier desk</button>
-      <button class="tab" data-tab="grow" onclick="switchTab('grow')" data-i18n="tab8">8. Literacy &amp; Invest</button>
-    </div>
-
-    <!-- ══════════ TAB 1: KYC & APPLICATION ══════════ -->
-    <div class="panel active" id="panel-intake">
-      <div class="section-title">Applicant type &amp; KYC</div>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-h">Applicant profile</div>
-          <div class="cbdy">
-            <label class="required">Applicant type</label>
-            <select id="app-type" onchange="toggleBusinessFields()">
-              <option value="individual">Individual (employed / self-employed)</option>
-              <option value="sole">Sole proprietor</option>
-              <option value="limited">Limited company</option>
-              <option value="unregistered">Unregistered business / Jua Kali</option>
-            </select>
-
-            <label class="required">Full legal name</label>
-            <input id="full-name" placeholder="As on National ID / Passport" value="Amina Wanjiku Otieno" />
-
-            <div class="row2">
-              <div>
-                <label class="required">ID type</label>
-                <select id="id-type">
-                  <option>National ID</option>
-                  <option>Passport</option>
-                  <option>Alien ID</option>
-                </select>
-              </div>
-              <div>
-                <label class="required">ID / Passport number</label>
-                <input id="id-number" placeholder="e.g. 32145678" value="32145678" />
-              </div>
-            </div>
-
-            <label class="required">KRA PIN (individual)</label>
-            <input id="kra-pin" placeholder="A000000000X" value="A012345678X" />
-
-            <label class="required" data-i18n="phone_label">Phone (M-Pesa registered)</label>
-            <input id="phone" placeholder="07XX XXX XXX" value="0712345678" />
-
-            <label data-i18n="otp_label">Phone verification (OTP)</label>
-            <div class="row2">
-              <input id="otp-code" placeholder="Enter 6-digit OTP" maxlength="6" />
-              <button type="button" class="btn btn-secondary" style="padding:8px" onclick="sendOtp()" data-i18n="otp_btn">Send OTP</button>
-            </div>
-            <p class="hint" id="otp-status" data-i18n="otp_hint">Demo: any 6 digits accepted after Send OTP</p>
-
-
-            <label>Passport / ID photo</label>
-            <div class="photo-box">📷 Upload National ID / Passport photo<br><span class="hint">Demo: photo capture simulated for panel</span></div>
-
-            <label class="required">Loan purpose</label>
-            <select id="loan-purpose">
-              <option>Working capital / stock</option>
-              <option>Equipment / tools</option>
-              <option>Business expansion</option>
-              <option>Agri-inputs / livestock</option>
-              <option>Vehicle / boda asset</option>
-              <option>School fees (education)</option>
-              <option>Medical emergency</option>
-              <option>Other (specify in notes)</option>
-            </select>
-            <label>Purpose notes</label>
-            <textarea id="purpose-notes" placeholder="Brief description of how funds will be used"></textarea>
-          </div>
+    <section id="step-2" class="card hidden">
+      <h2 id="h-signup">Quick sign up</h2>
+      <label id="lbl-name">Full name</label>
+      <input id="name" placeholder="e.g. Amina Wanjiku Otieno" value="Amina Wanjiku Otieno" />
+      <div class="row2">
+        <div>
+          <label id="lbl-phone">Phone (M-Pesa)</label>
+          <input id="phone" placeholder="07XX XXX XXX" value="0712345678" />
         </div>
-
-        <div class="card">
-          <div class="chdr h-k">Business verification</div>
-          <div class="cbdy">
-            <label>Business / trade name</label>
-            <input id="biz-name" placeholder="Trading as..." value="Amina Fresh Produce" />
-
-            <label class="required">Business type / occupation</label>
-            <select id="trade" onchange="tradeOther()">
-              <option>Food vendor / mama mboga</option>
-              <option>Cloth merchant / mitumba</option>
-              <option>Tailor / fashion</option>
-              <option>Boda boda operator</option>
-              <option>Matatu / transport crew</option>
-              <option>Mechanic / garage</option>
-              <option>Carpenter / furniture</option>
-              <option>Mason / construction</option>
-              <option>Welder / metalwork</option>
-              <option>Electrician / plumber</option>
-              <option>Salon / barber / beauty</option>
-              <option>Phone accessories / electronics</option>
-              <option>Hardware / building materials</option>
-              <option>Agribusiness — crop farming</option>
-              <option>Agribusiness — dairy / livestock</option>
-              <option>Agribusiness — poultry / eggs</option>
-              <option>Agribusiness — horticulture / export</option>
-              <option>Fish monger / aquaculture</option>
-              <option>Jua Kali artisan (other)</option>
-              <option value="other">Other — type below</option>
-            </select>
-            <input id="trade-other" placeholder="Describe your business" style="display:none;margin-top:6px" />
-
-            <label>Physical location / market</label>
-            <input id="location" placeholder="County · Town · Market / stage" value="Nairobi · Githurai · Open-air market" />
-
-            <div id="biz-docs">
-              <label>Business registered?</label>
-              <select id="biz-reg" onchange="toggleRegFields()">
-                <option value="no">No — informal / unregistered</option>
-                <option value="yes">Yes — registered</option>
-              </select>
-
-              <div id="reg-fields" style="display:none">
-                <label>Business KRA PIN</label>
-                <input id="biz-kra" placeholder="P000000000X" />
-                <label>Years in operation</label>
-                <select id="biz-years">
-                  <option>&lt; 1 year</option>
-                  <option>1–2 years</option>
-                  <option selected>3–5 years</option>
-                  <option>5+ years</option>
-                </select>
-                <label>CR12 (limited companies)</label>
-                <input id="cr12" placeholder="CR12 reference / upload ref" />
-                <label>Certificate of incorporation</label>
-                <input id="coi" placeholder="Certificate number / upload ref" />
-              </div>
-            </div>
-
-            <label>Call report / verification contact</label>
-            <input id="call-contact" placeholder="Name &amp; phone of referee / landlord / supplier" value="Grace Njeri · 0722 111 222 (supplier)" />
-            <p class="hint">Used for call-back verification to reduce briefcase-company risk.</p>
-          </div>
+        <div>
+          <label id="lbl-id">National ID / Passport</label>
+          <input id="idnum" placeholder="ID number" value="32145678" />
         </div>
       </div>
+      <label id="lbl-kra">KRA PIN (optional)</label>
+      <input id="kra" placeholder="A000000000X" value="A012345678X" />
+      <button type="button" class="btn btn-secondary" onclick="goStep(1)" id="btn-back2">Back</button>
+      <button type="button" class="btn btn-primary" onclick="goStep(3)" id="btn-next2">Continue</button>
+    </section>
 
-      <div class="section-title" data-i18n="doc_title">Document checklist</div>
-      <div class="card"><div class="cbdy" id="doc-checklist">
-        <p class="hint" data-i18n="doc_hint">Updates from applicant type and registration status.</p>
-      </div></div>
-
-    </div>
-
-    <!-- ══════════ TAB 2: FINANCIALS ══════════ -->
-    <div class="panel" id="panel-finance">
-      <div class="section-title">Financial sources · Primary first</div>
-      <p class="hint" style="margin-bottom:10px">
-        Primary: Pochi la Biashara · Till · Bank · Paybill. Secondary: M-Pesa statements.
-        Agents flag abnormal M-Pesa transactions for officer review.
-      </p>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-m">Primary cashflow sources</div>
-          <div class="cbdy">
-            <label>Pochi la Biashara average monthly (KES)</label>
-            <input type="number" id="pochi" value="28000" min="0" step="500" />
-            <label>Till number monthly turnover (KES)</label>
-            <input type="number" id="till" value="0" min="0" step="500" />
-            <label>Paybill monthly collections (KES)</label>
-            <input type="number" id="paybill" value="0" min="0" step="500" />
-            <label>Bank account avg monthly credits (KES)</label>
-            <input type="number" id="bank" value="12000" min="0" step="500" />
-            <label>Primary source reliability</label>
-            <select id="primary-src">
-              <option>Pochi la Biashara</option>
-              <option>Till number</option>
-              <option>Paybill</option>
-              <option>Bank statement</option>
-              <option>Mixed primary</option>
-            </select>
-          </div>
+    <section id="step-3" class="card hidden">
+      <h2 id="h-details">Application details</h2>
+      <label id="lbl-trade">What do you do?</label>
+      <select id="trade">
+        <option>Food vendor / mama mboga</option>
+        <option>Cloth merchant / mitumba</option>
+        <option>Tailor / fashion</option>
+        <option>Boda boda operator</option>
+        <option>Mechanic / garage</option>
+        <option>Carpenter / mason / welder</option>
+        <option>Salon / barber</option>
+        <option>Agribusiness — crops or livestock</option>
+        <option>Other small business</option>
+      </select>
+      <div class="row2">
+        <div>
+          <label id="lbl-amount">Loan amount (KES)</label>
+          <input type="number" id="amount" value="45000" min="1000" step="500" />
         </div>
-        <div class="card">
-          <div class="chdr h-f">Secondary · M-Pesa &amp; statements</div>
-          <div class="cbdy">
-            <label>M-Pesa monthly average (KES)</label>
-            <input type="number" id="mpesa" value="18500" min="0" step="500" />
-            <label>M-Pesa outlier / abnormal flags</label>
-            <select id="mpesa-outliers">
-              <option value="none">None detected</option>
-              <option value="spike">Large one-off credit spikes</option>
-              <option value="round">Frequent round-number transfers</option>
-              <option value="night">Unusual night-time activity</option>
-              <option value="third">Heavy third-party pass-through</option>
-            </select>
-            <label>Requested loan amount (KES)</label>
-            <input type="number" id="amount" value="45000" min="1000" step="500" />
-            <label>Chama / group membership</label>
-            <select id="chama">
-              <option>None</option>
-              <option>&lt; 1 year</option>
-              <option selected>1–3 years active</option>
-              <option>3+ years active</option>
-            </select>
-
-            <div id="chama-journal-box">
-              <label>Chama journal / contribution records</label>
-              <select id="chama-journal">
-                <option value="none">Not a chama member / none available</option>
-                <option value="upload">Upload journal / contribution book (demo)</option>
-                <option value="summary">Enter summary of contributions</option>
-              </select>
-              <textarea id="chama-summary" placeholder="e.g. 24 months · avg contribution KES 2,000 · current pot share KES 48,000 · no missed payments" style="margin-top:6px;display:none"></textarea>
-              <div class="photo-box" id="chama-upload" style="display:none;margin-top:6px">📒 Upload chama journal / contribution PDF or photos<br><span class="hint">Demo: file upload simulated</span></div>
-            </div>
-
-            <label>Financial statements available?</label>
-            <select id="fs-avail">
-              <option value="none">None (informal)</option>
-              <option value="simple">Simple cashbook / sales book</option>
-              <option value="pl">P&amp;L only</option>
-              <option value="full">P&amp;L + Balance sheet</option>
-            </select>
-          </div>
+        <div>
+          <label id="lbl-purpose">Loan purpose</label>
+          <select id="purpose">
+            <option>Working capital / stock</option>
+            <option>Equipment / tools</option>
+            <option>Business expansion</option>
+            <option>Agri-inputs</option>
+            <option>Other</option>
+          </select>
         </div>
       </div>
-
-      <div class="section-title">CRB &amp; risk controls</div>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-h">Credit Reference Bureau</div>
-          <div class="cbdy">
-            <label>CRB check status (simulated)</label>
-            <select id="crb">
-              <option value="clear">Clear / no adverse</option>
-              <option value="mild">Mild defaults (settled)</option>
-              <option value="active">Active non-performing</option>
-              <option value="unknown">Not yet pulled</option>
-            </select>
-            <p class="hint">In production this connects to licensed CRB providers under consent.</p>
-          </div>
+      <div class="row2">
+        <div>
+          <label id="lbl-pochi">Pochi / Till / Bank monthly avg (KES)</label>
+          <input type="number" id="primary" value="28000" min="0" step="500" />
         </div>
-        <div class="card">
-          <div class="chdr h-o">Hekima compliance switches</div>
-          <div class="cbdy">
-            <label>SASRA / capital flag</label>
-            <select id="sasra">
-              <option>Within policy</option>
-              <option>Near limit — review</option>
-              <option>Breach — block</option>
-            </select>
-            <label>Kenya DPA 2019 consent</label>
-            <select id="dpa">
-              <option>Consent on file</option>
-              <option>Missing consent</option>
-            </select>
-            <label>Gender / protected-class proxy (GUARD)</label>
-            <select id="bias">
-              <option>No proxy fields</option>
-              <option>Proxy field present — block</option>
-            </select>
-            <label>Collateral reliance</label>
-            <select id="collateral">
-              <option>Cashflow primary (preferred)</option>
-              <option>Mixed cashflow + security</option>
-              <option>Security-heavy (discourage)</option>
-            </select>
-          </div>
+        <div>
+          <label id="lbl-mpesa">M-Pesa monthly avg (KES)</label>
+          <input type="number" id="mpesa" value="18000" min="0" step="500" />
         </div>
       </div>
-    </div>
+      <label id="lbl-chama">Chama membership</label>
+      <select id="chama">
+        <option>None</option>
+        <option>Less than 1 year</option>
+        <option selected>1–3 years active</option>
+        <option>3+ years active</option>
+      </select>
+      <p class="hint" id="hint-primary">Primary cashflow (Pochi, Till, bank) is weighted more than M-Pesa alone.</p>
+      <button type="button" class="btn btn-secondary" onclick="goStep(2)" id="btn-back3">Back</button>
+      <button type="button" class="btn btn-primary" onclick="runAgents()" id="btn-run">See how agents reason</button>
+    </section>
 
-
-    <!-- ══════════ TAB: CONSENT & T&Cs ══════════ -->
-    <div class="panel" id="panel-consent">
-      <div class="section-title">Consent · Data protection · Terms</div>
-      <div class="card">
-        <div class="chdr h-h">Kenya Data Protection Act, 2019 · Consent</div>
-        <div class="cbdy">
-          <p style="font-size:13px;margin-bottom:8px">
-            Before we assess your application, you must consent to processing of your personal and financial data.
-            PRIDE Lead is designed to comply with the <strong>Kenya Data Protection Act, 2019</strong> and related regulations.
-          </p>
-          <div class="consent-box">
-            <strong>Summary of what we process</strong><br><br>
-            • Identity data: name, National ID/Passport, photo, KRA PIN, phone<br>
-            • Business data: location, registration, CR12, incorporation certificates where applicable<br>
-            • Financial data: Pochi la Biashara, Till, Paybill, bank statements, M-Pesa statements, chama journals<br>
-            • Credit data: CRB records (pulled only with your consent through licensed bureaux)<br>
-            • Call-report referee details for verification<br><br>
-            <strong>Purpose</strong><br>
-            Credit assessment, fraud and briefcase-company controls, matching you to a licensed financier,
-            escrow settlement, audit trail, and regulatory reporting where required.<br><br>
-            <strong>Your rights</strong><br>
-            Access, correction, deletion (subject to legal retention), restriction, and complaint to the
-            Office of the Data Protection Commissioner (ODPC). You may withdraw consent; processing already
-            done lawfully may remain for audit/compliance.<br><br>
-            <strong>Sharing</strong><br>
-            Only with: (1) licensed financiers you are matched to, (2) licensed CRB providers under consent,
-            (3) regulators when legally required. We do not sell your data.<br><br>
-            <strong>Security</strong><br>
-            Encryption in transit, access controls, human-in-the-loop for final credit decisions,
-            and retention limited to what the law and credit lifecycle require.
-          </div>
-          <div class="consent-check">
-            <input type="checkbox" id="c-kyc" />
-            <label for="c-kyc" style="text-transform:none;font-weight:500;margin:0">I consent to PRIDE Lead collecting and processing my KYC and identity documents for this application.</label>
-          </div>
-          <div class="consent-check">
-            <input type="checkbox" id="c-fin" />
-            <label for="c-fin" style="text-transform:none;font-weight:500;margin:0">I consent to assessment of my financial records (Pochi, Till, Bank, Paybill, M-Pesa, chama journals) for credit decisioning.</label>
-          </div>
-          <div class="consent-check">
-            <input type="checkbox" id="c-crb" />
-            <label for="c-crb" style="text-transform:none;font-weight:500;margin:0">I consent to a CRB check through a licensed Credit Reference Bureau for this application.</label>
-          </div>
-          <div class="consent-check">
-            <input type="checkbox" id="c-tc" />
-            <label for="c-tc" style="text-transform:none;font-weight:500;margin:0">I have read and agree to the Terms &amp; Conditions, including the 5% + 5% marketplace fee and escrow process on successful disbursement.</label>
-          </div>
-          <p class="hint" id="consent-status">All four consents are required before running agent decisioning.</p>
-        </div>
+    <section id="step-4" class="card hidden">
+      <h2 id="h-reason">How the agents reason</h2>
+      <div class="flow" id="flow">
+        <span id="f-k">Kiburi</span> → <span id="f-h">Hekima</span> → <span id="f-u">Uamuzi</span> → <span id="f-o">You (officer)</span>
       </div>
-      <div class="card" style="margin-top:12px">
-        <div class="chdr h-o">Key terms (short)</div>
-        <div class="cbdy" style="font-size:12px">
-          <ul class="flag-list">
-            <li>PRIDE Lead is a marketplace connecting borrowers to licensed financiers; it is not itself a deposit-taking institution.</li>
-            <li>Final credit decision always rests with a licensed human officer / financier.</li>
-            <li>Platform fee: 5% of loan amount from the borrower and 5% from the financier on successful disbursement via escrow.</li>
-            <li>False information or synthetic briefcase companies may lead to decline, reporting, and legal action.</li>
-            <li>You may appeal declines through the published adverse-action path.</li>
-          </ul>
-        </div>
+      <div id="reasoning"></div>
+      <div id="officer-box" class="hidden" style="margin-top:12px">
+        <h2 id="h-officer">Your decision (officer)</h2>
+        <p class="hint" id="hint-officer">Agents only recommend. The final decision is yours.</p>
+        <button type="button" class="btn btn-ok" onclick="decide('approve')" id="d-ok">Approve</button>
+        <button type="button" class="btn btn-warn" onclick="decide('counter')" id="d-co">Counter-offer</button>
+        <button type="button" class="btn btn-danger" onclick="decide('decline')" id="d-no">Decline</button>
       </div>
-    </div>
-
-    <!-- ══════════ TAB: AGENTS ══════════ -->
-    <div class="panel" id="panel-agents">
-      <div class="sec-label">One-click demo scenarios</div>
-      <div class="presets">
-        <button class="preset" onclick="loadPreset('happy')" id="p-happy">✓ Happy path — Approve</button>
-        <button class="preset" onclick="loadPreset('bias')" id="p-bias">🛡 GUARD bias block</button>
-        <button class="preset" onclick="loadPreset('crb')" id="p-crb">📉 CRB / briefcase pause</button>
-        <button class="preset" onclick="loadPreset('outlier')" id="p-outlier">⚠ M-Pesa outlier review</button>
-        <button class="preset" onclick="loadPreset('decline')" id="p-decline">✕ Decline + appeal</button>
-      </div>
-
-      <div class="sec-label">Workflow status</div>
-      <div class="flow">
-        <div class="fb fb-k" id="fb-k"><span class="dot d-idle" id="sd-k"></span>Kiburi<br><small>Idle</small></div>
-        <div class="fa">→</div>
-        <div class="fb fb-h" id="fb-h"><span class="dot d-idle" id="sd-h"></span>Hekima<br><small>Idle</small></div>
-        <div class="fa">→</div>
-        <div class="fb fb-u" id="fb-u"><span class="dot d-idle" id="sd-u"></span>Uamuzi<br><small>Idle</small></div>
-        <div class="fa">→</div>
-        <div class="fb fb-o" id="fb-o"><span class="dot d-idle" id="sd-o"></span>Officer<br><small>Pending</small></div>
-      </div>
-
-      <div class="grid" style="margin-bottom:12px">
-        <div class="card">
-          <div class="chdr h-u">Uamuzi briefing language</div>
-          <div class="cbdy">
-            <label>Language</label>
-            <select id="lang">
-              <option>English</option>
-              <option>Swahili</option>
-              <option>Dholuo</option>
-            </select>
-            <label>Channel</label>
-            <select id="chan">
-              <option>In-app officer desk</option>
-              <option>SMS summary</option>
-              <option>WhatsApp</option>
-            </select>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr h-o">Run controls</div>
-          <div class="cbdy">
-            <div class="actions" style="margin:0">
-              <button class="btn btn-primary" id="btn-run" onclick="runWorkflow()">Run multi-agent decision</button>
-              <button class="btn btn-secondary" onclick="resetAll()">Reset</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="alert a-guard" id="a-guard">⛔ GUARD / compliance block — see log</div>
-      <div class="alert a-pause" id="a-pause">⏸ PRIDE Loop pause — human review required</div>
-      <div class="alert a-ok" id="a-ok">✓ Ready for officer decision</div>
-
-      <div class="score-card" id="score-card">
-        <div class="score-row">
-          <div class="gauge-wrap">
-            <svg width="90" height="90" viewBox="0 0 90 90">
-              <circle cx="45" cy="45" r="38" fill="none" stroke="#e2e8f0" stroke-width="8"/>
-              <circle id="gauge-arc" cx="45" cy="45" r="38" fill="none" stroke="#0f766e" stroke-width="8"
-                stroke-dasharray="239" stroke-dashoffset="239" stroke-linecap="round"/>
-            </svg>
-            <div class="gauge-center"><span id="gauge-val">—</span><small>/100</small></div>
-          </div>
-          <div class="score-details">
-            <h3 id="tier-label">Risk tier</h3>
-            <div class="bd" id="score-breakdown"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-label">Agent log</div>
-      <div class="log" id="log"></div>
-
-      <div class="sec-label" id="bhead" style="display:none">Officer briefing (Uamuzi)</div>
-      <div class="brief" id="brief"></div>
-      <div class="payload" id="payload"></div>
-
-      <div class="officer-panel" id="officer-panel">
-        <strong>Licensed officer decision</strong>
-        <p class="hint" style="margin:6px 0 10px">Final authority remains with the human officer. Agents only recommend.</p>
-        <button class="btn btn-ok obtn" onclick="officerDecide('approve')">Approve</button>
-        <button class="btn btn-warn obtn" onclick="officerDecide('counter')">Counter-offer</button>
-        <button class="btn btn-danger obtn" onclick="officerDecide('decline')">Decline</button>
-        <button class="btn btn-secondary obtn" onclick="officerDecide('escalate')">Escalate to Ethics</button>
-      </div>
-    </div>
-
-    <!-- ══════════ TAB 4: MARKETPLACE ══════════ -->
-    <div class="panel" id="panel-market">
-      <div class="section-title">Borrower ↔ Financier marketplace</div>
-      <div class="fee-box">
-        <strong>Business model</strong><br>
-        Successful disbursement: <strong>5% fee from borrower</strong> + <strong>5% fee from financier</strong>.
-        Funds settle via <strong>escrow</strong>. Platform does not take principal risk.
-      </div>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-m">Escrow &amp; settlement</div>
-          <div class="cbdy">
-            <p style="font-size:13px;margin-bottom:8px">
-              On officer approval and financier match, loan amount is held in escrow.
-              Release to borrower only after KYC + call-report verification and signed offer.
-            </p>
-            <label>Demo escrow status</label>
-            <select id="escrow-status">
-              <option>Idle — no live deal</option>
-              <option>Funds committed by financier</option>
-              <option>KYC / call report pending</option>
-              <option>Released to borrower</option>
-              <option>Returned to financier</option>
-            </select>
-            <label>Matched financier (demo)</label>
-            <select id="financier">
-              <option>Jua Kali SACCO — Nairobi</option>
-              <option>Community MFI partner</option>
-              <option>Digital lender (licensed)</option>
-              <option>Awaiting match</option>
-            </select>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr h-h">Briefcase-company controls</div>
-          <div class="cbdy">
-            <ul class="flag-list">
-              <li>Mandatory physical location + call-report referee</li>
-              <li>CR12 / incorporation for limited companies</li>
-              <li>Business KRA PIN when registered</li>
-              <li>Primary cashflow (Pochi / Till / Bank) preferred over pure M-Pesa</li>
-              <li>M-Pesa outlier detection for officer questions</li>
-              <li>Cashflow conversion analysis — do not lend on security alone</li>
-              <li>Human officer final decision + audit trail</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="section-title">Conversion / cashflow principle</div>
-      <div class="card">
-        <div class="cbdy" style="font-size:13px">
-          The system analyses what part of the business the loan finances (stock cycle, equipment, agri season).
-          <strong>We underwrite cashflow, not collateral strength.</strong>
-          Security may support recovery but must not be the primary reason to lend.
-          Kiburi reports a simple conversion view (loan size vs. monthly primary cashflow) so the officer can see affordability clearly.
-        </div>
-      </div>
-    </div>
-
-
-    <div class="panel" id="panel-status">
-      <div class="section-title" data-i18n="status_title">Application status tracker</div>
-      <div class="status-track" id="status-track">
-        <div class="st-step" id="st-1" data-i18n="st1">Received</div><span class="st-arrow">→</span>
-        <div class="st-step" id="st-2" data-i18n="st2">KYC / OTP</div><span class="st-arrow">→</span>
-        <div class="st-step" id="st-3" data-i18n="st3">Under review</div><span class="st-arrow">→</span>
-        <div class="st-step" id="st-4" data-i18n="st4">Officer decision</div><span class="st-arrow">→</span>
-        <div class="st-step" id="st-5" data-i18n="st5">Escrow</div><span class="st-arrow">→</span>
-        <div class="st-step" id="st-6" data-i18n="st6">Disbursed</div>
-      </div>
-      <p class="hint" id="status-msg" data-i18n="status_msg">Run agent decisioning and record an officer decision to advance the tracker.</p>
-      <div class="section-title" data-i18n="appeal_title">Adverse action &amp; appeal</div>
-      <div class="card"><div class="cbdy">
-        <p style="font-size:13px" data-i18n="appeal_body">
-          If declined, you are entitled to a clear reason and a path to appeal.
-          Submit extra documents or correct errors within the stated window.
-        </p>
-        <label data-i18n="appeal_reason">Decline reason (from officer)</label>
-        <select id="decline-reason">
-          <option value="">—</option>
-          <option>Insufficient cashflow / conversion</option>
-          <option>CRB active non-performing</option>
-          <option>Incomplete KYC</option>
-          <option>Policy / SASRA limit</option>
-          <option>Suspected briefcase / verification failed</option>
-          <option>Other (see notes)</option>
-        </select>
-        <label data-i18n="appeal_notes">Appeal notes / extra evidence</label>
-        <textarea id="appeal-notes" placeholder="Describe correction or attach evidence list"></textarea>
-        <div class="actions">
-          <button type="button" class="btn btn-primary" onclick="submitAppeal()" data-i18n="appeal_btn">Submit appeal</button>
-        </div>
-        <p class="hint" id="appeal-status"></p>
-      </div></div>
-      <div class="section-title" data-i18n="audit_title">Audit export</div>
-      <div class="card"><div class="cbdy">
-        <p style="font-size:13px" data-i18n="audit_body">Export score breakdown, consents, and officer decision for internal / SASRA-style audit (demo JSON).</p>
-        <button type="button" class="btn btn-secondary" onclick="exportAudit()" data-i18n="audit_btn">Download audit JSON</button>
-      </div></div>
-    </div>
-
-    <div class="panel" id="panel-financier">
-      <div class="section-title" data-i18n="fin_title">Financier desk (demo)</div>
-      <p class="hint" data-i18n="fin_hint">Licensed SACCO / MFI view — accept matches, fund escrow, see agent brief.</p>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-m" data-i18n="fin_queue">Match queue</div>
-          <div class="cbdy">
-            <label data-i18n="fin_case">Selected case</label>
-            <select id="fin-case">
-              <option>Amina Wanjiku Otieno — KES 45,000 — Food vendor</option>
-              <option>Demo case B — Agri dairy — KES 60,000</option>
-              <option>No open matches</option>
-            </select>
-            <label data-i18n="fin_action">Financier action</label>
-            <select id="fin-action">
-              <option>Accept match &amp; commit to escrow</option>
-              <option>Request more documents</option>
-              <option>Decline match</option>
-            </select>
-            <div class="actions">
-              <button type="button" class="btn btn-ok" onclick="financierAct()" data-i18n="fin_go">Confirm action</button>
-            </div>
-            <p class="hint" id="fin-status"></p>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr h-h" data-i18n="fin_brief">Latest agent brief (read-only)</div>
-          <div class="cbdy">
-            <div class="brief show" id="fin-brief-view" style="display:block;min-height:80px">Run decisioning on the Agent tab to populate.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══════════ TAB: LITERACY & INVEST ══════════ -->
-    <div class="panel" id="panel-grow">
-      <div class="section-title">Financial literacy workshops</div>
-      <p class="hint" style="margin-bottom:10px">Optional support for members — not a condition of credit, but offered to build long-term resilience.</p>
-      <div class="grid">
-        <div class="card">
-          <div class="chdr h-k">Upcoming / available workshops (demo)</div>
-          <div class="cbdy">
-            <div class="workshop-card"><strong>Budgeting for Jua Kali cashflow</strong><br>1.5 hrs · Swahili / English · In-person or WhatsApp group</div>
-            <div class="workshop-card"><strong>Reading your M-Pesa &amp; Pochi statement</strong><br>Spot outliers, track stock cycles, prepare for credit reviews</div>
-            <div class="workshop-card"><strong>Chama governance &amp; contribution discipline</strong><br>Journals, roles, and avoiding group default risk</div>
-            <div class="workshop-card"><strong>Rights under Kenya DPA 2019</strong><br>What lenders may ask, what you can refuse, how to complain</div>
-            <label>Interest in workshops</label>
-            <select id="workshop-interest">
-              <option>Not now</option>
-              <option>Yes — notify me of next session</option>
-              <option>Yes — prefer WhatsApp mini-lessons</option>
-            </select>
-          </div>
-        </div>
-        <div class="card">
-          <div class="chdr h-m">Grow investments (after credit health)</div>
-          <div class="cbdy">
-            <p style="font-size:13px;margin-bottom:8px">
-              Once cashflow is stable, members can explore regulated options.
-              <strong>This is education, not personalised investment advice.</strong>
-            </p>
-            <div class="invest-card"><strong>Money market funds (MMFs)</strong><br>Low-risk, liquid units from licensed fund managers — useful for surplus stock cash</div>
-            <div class="invest-card"><strong>Treasury bills / bonds (via agents)</strong><br>Government securities for longer horizons</div>
-            <div class="invest-card"><strong>SACCO non-withdrawable deposits / shares</strong><br>Build standing with your SACCO while earning declared dividends</div>
-            <div class="invest-card"><strong>Chama investment clubs (structured)</strong><br>Pooled vehicles with clear rules — not informal merry-go-round only</div>
-            <label>Learn more about</label>
-            <select id="invest-interest">
-              <option>None for now</option>
-              <option>Money market funds</option>
-              <option>Govt securities</option>
-              <option>SACCO savings products</option>
-              <option>Structured chama investing</option>
-            </select>
-            <p class="hint">Links to licensed providers and CMA-regulated materials can be added in production.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
+      <div id="final-msg" class="agent-block o hidden" style="margin-top:12px"></div>
+      <button type="button" class="btn btn-secondary" onclick="goStep(3)" id="btn-again">Edit details</button>
+      <button type="button" class="btn btn-secondary" onclick="location.reload()" id="btn-restart">Start over</button>
+    </section>
   </div>
 
   <script>
-    let runs = 0, blocks = 0, decisions = 0;
-    let lastScore = 0, lastTier = '', waitingOfficer = false;
-
-    function switchTab(name) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('panel-' + name).classList.add('active');
-    }
-
-    function toggleBusinessFields() {
-      // reserved for future fine-grained visibility
-    }
-    function toggleRegFields() {
-      const yes = document.getElementById('biz-reg').value === 'yes';
-      document.getElementById('reg-fields').style.display = yes ? 'block' : 'none';
-    }
-    function tradeOther() {
-      const show = document.getElementById('trade').value === 'other';
-      document.getElementById('trade-other').style.display = show ? 'block' : 'none';
-    }
-
-    function log(msg, cls = 'li') {
-      const el = document.getElementById('log');
-      el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-      el.scrollTop = el.scrollHeight;
-    }
-    function setFlow(id, status, sub) {
-      const b = document.getElementById('fb-' + id);
-      const d = document.getElementById('sd-' + id);
-      d.className = 'dot d-' + status;
-      b.querySelector('small').textContent = sub;
-      b.classList.toggle('fb-act', status === 'active');
-      b.classList.toggle('fb-done', status === 'done');
-    }
-    const delay = ms => new Promise(r => setTimeout(r, ms));
-
-    function clearAlerts() {
-      ['a-guard', 'a-pause', 'a-ok'].forEach(id => document.getElementById(id).classList.remove('show'));
-    }
-    function resetUI() {
-      ['k', 'h', 'u', 'o'].forEach(a => setFlow(a, 'idle', a === 'o' ? 'Pending' : 'Idle'));
-      clearAlerts();
-      document.getElementById('payload').classList.remove('show');
-      document.getElementById('payload').textContent = '';
-      document.getElementById('brief').classList.remove('show');
-      document.getElementById('brief').textContent = '';
-      document.getElementById('bhead').style.display = 'none';
-      document.getElementById('score-card').classList.remove('show');
-      document.getElementById('officer-panel').classList.remove('show');
-      document.getElementById('log').innerHTML = '';
-      document.getElementById('btn-run').disabled = false;
-      waitingOfficer = false;
-      document.querySelectorAll('.obtn').forEach(b => b.disabled = false);
-    }
-    function resetAll() {
-      resetUI();
-      document.getElementById('m-t').textContent = '—';
-      document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
-    }
-
-    function showScore(score, tier, breakdownHtml) {
-      const card = document.getElementById('score-card');
-      card.classList.add('show');
-      document.getElementById('gauge-val').textContent = score;
-      document.getElementById('tier-label').textContent = tier + ' · cashflow-first';
-      document.getElementById('score-breakdown').innerHTML = breakdownHtml;
-      const circ = 2 * Math.PI * 38;
-      const offset = circ - (score / 100) * circ;
-      const arc = document.getElementById('gauge-arc');
-      arc.style.strokeDasharray = circ;
-      arc.style.strokeDashoffset = offset;
-      arc.style.stroke = score >= 70 ? '#15803d' : score >= 50 ? '#b45309' : '#b91c1c';
-    }
-
-    function loadPreset(name) {
-      document.querySelectorAll('.preset').forEach(p => p.classList.remove('active'));
-      const btn = document.getElementById('p-' + name);
-      if (btn) btn.classList.add('active');
-      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-
-      set('app-type', 'sole');
-      set('full-name', 'Amina Wanjiku Otieno');
-      set('id-number', '32145678');
-      set('kra-pin', 'A012345678X');
-      set('phone', '0712345678');
-      set('biz-name', 'Amina Fresh Produce');
-      set('location', 'Nairobi · Githurai · Open-air market');
-      set('call-contact', 'Grace Njeri · 0722 111 222 (supplier)');
-      set('loan-purpose', 'Working capital / stock');
-      set('biz-reg', 'no');
-      toggleRegFields();
-
-      if (name === 'happy') {
-        set('trade', 'Food vendor / mama mboga');
-        set('amount', '45000');
-        set('pochi', '32000');
-        set('till', '0');
-        set('paybill', '0');
-        set('bank', '8000');
-        set('mpesa', '22000');
-        set('mpesa-outliers', 'none');
-        set('chama', '3+ years active');
-        set('crb', 'clear');
-        set('sasra', 'Within policy');
-        set('dpa', 'Consent on file');
-        set('bias', 'No proxy fields');
-        set('collateral', 'Cashflow primary (preferred)');
-        set('fs-avail', 'simple');
-      } else if (name === 'bias') {
-        set('trade', 'Salon / barber / beauty');
-        set('amount', '30000');
-        set('pochi', '15000');
-        set('mpesa', '12000');
-        set('mpesa-outliers', 'none');
-        set('chama', '1–3 years active');
-        set('crb', 'clear');
-        set('bias', 'Proxy field present — block');
-        set('dpa', 'Consent on file');
-        set('sasra', 'Within policy');
-      } else if (name === 'crb') {
-        set('trade', 'Cloth merchant / mitumba');
-        set('amount', '80000');
-        set('pochi', '5000');
-        set('mpesa', '45000');
-        set('mpesa-outliers', 'third');
-        set('chama', 'None');
-        set('crb', 'active');
-        set('biz-reg', 'no');
-        set('location', '');
-        set('call-contact', '');
-        set('sasra', 'Within policy');
-        set('dpa', 'Consent on file');
-        set('bias', 'No proxy fields');
-        set('collateral', 'Security-heavy (discourage)');
-      } else if (name === 'outlier') {
-        set('trade', 'Agribusiness — dairy / livestock');
-        set('amount', '60000');
-        set('pochi', '18000');
-        set('bank', '10000');
-        set('mpesa', '35000');
-        set('mpesa-outliers', 'spike');
-        set('chama', '1–3 years active');
-        set('crb', 'mild');
-        set('sasra', 'Near limit — review');
-        set('dpa', 'Consent on file');
-        set('bias', 'No proxy fields');
-        set('collateral', 'Mixed cashflow + security');
-      } else if (name === 'decline') {
-        set('trade', 'Boda boda operator');
-        set('amount', '120000');
-        set('pochi', '8000');
-        set('mpesa', '9000');
-        set('mpesa-outliers', 'round');
-        set('chama', 'None');
-        set('crb', 'active');
-        set('sasra', 'Breach — block');
-        set('dpa', 'Missing consent');
-        set('bias', 'No proxy fields');
-        set('collateral', 'Security-heavy (discourage)');
-      }
-      switchTab('agents');
-    }
-
-
-
-    // ── i18n EN / SW ──
-    const I18N = {
+    let lang = 'en';
+    const T = {
       en: {
-        sandbox: "🧪 SANDBOX · Demo only — not live lending",
-        tab1: "1. KYC & Application", tab2: "2. Financials", tab3: "3. Consent & T&Cs",
-        tab4: "4. Agent Decisioning", tab5: "5. Marketplace & Escrow", tab6: "6. Status & Appeal",
-        tab7: "7. Financier desk", tab8: "8. Literacy & Invest",
-        phone_label: "Phone (M-Pesa registered)", otp_label: "Phone verification (OTP)",
-        otp_btn: "Send OTP", otp_hint: "Demo: any 6 digits accepted after Send OTP",
-        otp_sent: "OTP sent (demo). Enter any 6 digits.", otp_ok: "Phone verified (demo).",
-        otp_need: "Send OTP first, then enter 6 digits.",
-        doc_title: "Document checklist", doc_hint: "Updates from applicant type and registration status.",
-        fee_title: "Rate & fee calculator", fee_loan: "Loan amount", fee_bor: "Borrower fee (5%)",
-        fee_fin: "Financier fee (5%)", fee_net: "Net to borrower (after borrower fee)",
-        fee_note: "Illustrative only. Financier interest/pricing is set by the matched lender, not PRIDE Lead.",
-        fee_refresh: "Refresh from application amount",
-        status_title: "Application status tracker",
-        st1: "Received", st2: "KYC / OTP", st3: "Under review", st4: "Officer decision", st5: "Escrow", st6: "Disbursed",
-        status_msg: "Run agent decisioning and record an officer decision to advance the tracker.",
-        appeal_title: "Adverse action & appeal",
-        appeal_body: "If declined, you are entitled to a clear reason and a path to appeal. Submit extra documents or correct errors within the stated window.",
-        appeal_reason: "Decline reason (from officer)", appeal_notes: "Appeal notes / extra evidence",
-        appeal_btn: "Submit appeal", appeal_ok: "Appeal recorded (demo). A human officer will review.",
-        audit_title: "Audit export", audit_body: "Export score breakdown, consents, and officer decision for internal / SASRA-style audit (demo JSON).",
-        audit_btn: "Download audit JSON",
-        fin_title: "Financier desk (demo)", fin_hint: "Licensed SACCO / MFI view — accept matches, fund escrow, see agent brief.",
-        fin_queue: "Match queue", fin_case: "Selected case", fin_action: "Financier action", fin_go: "Confirm action",
-        fin_brief: "Latest agent brief (read-only)",
-        offline_note: "Low-data / offline: Core forms work on slow networks. Production roadmap includes USSD for feature phones and offline draft save.",
-        consent_block: "Please accept all four consents and verify phone OTP before running decisioning."
+        title: 'PRIDE Lead',
+        sub: 'Ethical loan decisioning — see how the AI agents reason. A human officer always decides.',
+        p1: '1. Terms', p2: '2. Sign up', p3: '3. Your details', p4: '4. Agent reasoning',
+        hTerms: 'Terms & consent',
+        terms: '<p><strong>What we do.</strong> PRIDE Lead helps assess a loan application using three AI agents (Kiburi, Hekima, Uamuzi). A licensed human officer makes the final decision.</p><p style="margin-top:8px"><strong>What we use.</strong> With your consent we process identity (name, ID, phone), business type, and financial signals you provide (e.g. M-Pesa or Pochi averages). This prototype does not contact a live credit bureau or lender.</p><p style="margin-top:8px"><strong>Kenya Data Protection Act, 2019.</strong> You can access, correct, or withdraw consent. We do not sell your data.</p><p style="margin-top:8px"><strong>Sandbox.</strong> This is a demonstration only — not a real loan offer.</p>',
+        agree: 'I have read and agree to the terms. I consent to my details being used for this demo assessment.',
+        cont: 'Continue', back: 'Back',
+        hSignup: 'Quick sign up', name: 'Full name', phone: 'Phone (M-Pesa)', id: 'National ID / Passport', kra: 'KRA PIN (optional)',
+        hDetails: 'Application details', trade: 'What do you do?', amount: 'Loan amount (KES)', purpose: 'Loan purpose',
+        primary: 'Pochi / Till / Bank monthly avg (KES)', mpesa: 'M-Pesa monthly avg (KES)', chama: 'Chama membership',
+        hintP: 'Primary cashflow (Pochi, Till, bank) is weighted more than M-Pesa alone.',
+        run: 'See how agents reason',
+        hReason: 'How the agents reason',
+        hOff: 'Your decision (officer)', hintOff: 'Agents only recommend. The final decision is yours.',
+        ok: 'Approve', co: 'Counter-offer', no: 'Decline',
+        again: 'Edit details', restart: 'Start over',
+        kTitle: 'Kiburi — Credit Scout', hTitle: 'Hekima — Risk Guardian', uTitle: 'Uamuzi — Officer briefing'
       },
       sw: {
-        sandbox: "🧪 SANDBOX · Onyesho tu — si mkopo halisi",
-        tab1: "1. KYC na Maombi", tab2: "2. Fedha", tab3: "3. Idhini na Masharti",
-        tab4: "4. Maamuzi ya Mawakala", tab5: "5. Soko na Escrow", tab6: "6. Hali na Rufaa",
-        tab7: "7. Dawati la Mfadhili", tab8: "8. Elimu na Uwekezaji",
-        phone_label: "Simu (imesajiliwa M-Pesa)", otp_label: "Uthibitisho wa simu (OTP)",
-        otp_btn: "Tuma OTP", otp_hint: "Onyesho: tarakimu 6 zozote baada ya Tuma OTP",
-        otp_sent: "OTP imetumwa (onyesho). Weka tarakimu 6.", otp_ok: "Simu imethibitishwa (onyesho).",
-        otp_need: "Tuma OTP kwanza, kisha weka tarakimu 6.",
-        doc_title: "Orodha ya nyaraka", doc_hint: "Inasasishwa kulingana na aina ya mwombaji na usajili.",
-        fee_title: "Kikokotoo cha ada", fee_loan: "Kiasi cha mkopo", fee_bor: "Ada ya mwombaji (5%)",
-        fee_fin: "Ada ya mfadhili (5%)", fee_net: "Net kwa mwombaji (baada ya ada)",
-        fee_note: "Mfano tu. Riba ya mfadhili huwekwa na mkopeshaji, si PRIDE Lead.",
-        fee_refresh: "Sasisha kutoka kiasi cha maombi",
-        status_title: "Ufuatiliaji wa hali ya maombi",
-        st1: "Imepokelewa", st2: "KYC / OTP", st3: "Inakaguliwa", st4: "Uamuzi wa afisa", st5: "Escrow", st6: "Imelipwa",
-        status_msg: "Endesha maamuzi ya mawakala na uandike uamuzi wa afisa ili kusogeza ufuatiliaji.",
-        appeal_title: "Hatua mbaya na rufaa",
-        appeal_body: "Ukikataliwa, una haki ya sababu wazi na njia ya rufaa. Wasilisha nyaraka za ziada au sahihisha makosa.",
-        appeal_reason: "Sababu ya kukataa (kutoka afisa)", appeal_notes: "Maelezo ya rufaa / ushahidi",
-        appeal_btn: "Wasilisha rufaa", appeal_ok: "Rufaa imerekodiwa (onyesho). Afisa atakagua.",
-        audit_title: "Export ya ukaguzi", audit_body: "Pakua muhtasari wa alama, idhini, na uamuzi wa afisa (JSON ya onyesho).",
-        audit_btn: "Pakua JSON ya ukaguzi",
-        fin_title: "Dawati la mfadhili (onyesho)", fin_hint: "Mwonekano wa SACCO/MFI — kubali mechi, fadhili escrow, ona muhtasari.",
-        fin_queue: "Foleni ya mechi", fin_case: "Kesi iliyochaguliwa", fin_action: "Kitendo cha mfadhili", fin_go: "Thibitisha",
-        fin_brief: "Muhtasari wa mawakala (soma tu)",
-        offline_note: "Mtandao dhaifu: Fomu kuu zinafanya kazi. Baadaye: USSD na kuhifadhi rasimu bila mtandao.",
-        consent_block: "Kubali idhini zote nne na thibitisha OTP ya simu kabla ya kuendesha maamuzi."
+        title: 'PRIDE Lead',
+        sub: 'Maamuzi ya mkopo kwa uadilifu — ona jinsi mawakala wa AI wanavyofikiri. Afisa binadamu ndiye anaamua.',
+        p1: '1. Masharti', p2: '2. Jisajili', p3: '3. Maelezo yako', p4: '4. Hoja za mawakala',
+        hTerms: 'Masharti na idhini',
+        terms: '<p><strong>Tunachofanya.</strong> PRIDE Lead hutathmini ombi la mkopo kwa mawakala watatu (Kiburi, Hekima, Uamuzi). Afisa binadamu mwenye leseni hufanya uamuzi wa mwisho.</p><p style="margin-top:8px"><strong>Tunachotumia.</strong> Kwa idhini yako: jina, kitambulisho, simu, aina ya biashara, na ishara za fedha unazotoa. Onyesho hili halitumii bureau halisi ya mikopo.</p><p style="margin-top:8px"><strong>Sheria ya Ulinzi wa Data, 2019.</strong> Unaweza kufikia, kurekebisha, au kuondoa idhini. Hatuuzi data yako.</p><p style="margin-top:8px"><strong>Sandbox.</strong> Hii ni onyesho tu — si ofa halisi ya mkopo.</p>',
+        agree: 'Nimesoma na ninakubali masharti. Ninatoa idhini ya kutumia maelezo yangu katika tathmini hii ya onyesho.',
+        cont: 'Endelea', back: 'Rudi',
+        hSignup: 'Usajili wa haraka', name: 'Jina kamili', phone: 'Simu (M-Pesa)', id: 'Kitambulisho / Pasipoti', kra: 'PIN ya KRA (si lazima)',
+        hDetails: 'Maelezo ya ombi', trade: 'Unafanya nini?', amount: 'Kiasi cha mkopo (KES)', purpose: 'Madhumuni ya mkopo',
+        primary: 'Wastani wa Pochi / Till / Benki kwa mwezi (KES)', mpesa: 'Wastani wa M-Pesa kwa mwezi (KES)', chama: 'Uanachama wa chama',
+        hintP: 'Mtiririko mkuu (Pochi, Till, benki) una uzito zaidi kuliko M-Pesa peke yake.',
+        run: 'Ona jinsi mawakala wanavyofikiri',
+        hReason: 'Jinsi mawakala wanavyofikiri',
+        hOff: 'Uamuzi wako (afisa)', hintOff: 'Mawakala wanapendekeza tu. Uamuzi wa mwisho ni wako.',
+        ok: 'Idhinisha', co: 'Toa ofa tofauti', no: 'Kataa',
+        again: 'Hariri maelezo', restart: 'Anza upya',
+        kTitle: 'Kiburi — Mpelelezi wa mikopo', hTitle: 'Hekima — Mlinzi wa hatari', uTitle: 'Uamuzi — Muhtasari kwa afisa'
       }
     };
-    let uiLang = 'en';
-    let otpSent = false, otpVerified = false;
-    let appStatus = 1;
-    let lastDecision = null;
-    let lastAudit = {};
 
-    function setUILang(lang) {
-      uiLang = lang;
-      document.getElementById('lang-en').classList.toggle('on', lang === 'en');
-      document.getElementById('lang-sw').classList.toggle('on', lang === 'sw');
-      const dict = I18N[lang] || I18N.en;
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const k = el.getAttribute('data-i18n');
-        if (dict[k]) el.textContent = dict[k];
-      });
-      try { localStorage.setItem('pride-lang', lang); } catch(e) {}
+    function setLang(l) {
+      lang = l;
+      document.getElementById('btn-en').classList.toggle('on', l === 'en');
+      document.getElementById('btn-sw').classList.toggle('on', l === 'sw');
+      const t = T[l];
+      document.getElementById('t-title').textContent = t.title;
+      document.getElementById('t-sub').textContent = t.sub;
+      document.getElementById('pill-1').textContent = t.p1;
+      document.getElementById('pill-2').textContent = t.p2;
+      document.getElementById('pill-3').textContent = t.p3;
+      document.getElementById('pill-4').textContent = t.p4;
+      document.getElementById('h-terms').textContent = t.hTerms;
+      document.getElementById('terms-box').innerHTML = t.terms;
+      document.getElementById('lbl-agree').textContent = t.agree;
+      document.getElementById('btn-next1').textContent = t.cont;
+      document.getElementById('h-signup').textContent = t.hSignup;
+      document.getElementById('lbl-name').textContent = t.name;
+      document.getElementById('lbl-phone').textContent = t.phone;
+      document.getElementById('lbl-id').textContent = t.id;
+      document.getElementById('lbl-kra').textContent = t.kra;
+      document.getElementById('btn-back2').textContent = t.back;
+      document.getElementById('btn-next2').textContent = t.cont;
+      document.getElementById('h-details').textContent = t.hDetails;
+      document.getElementById('lbl-trade').textContent = t.trade;
+      document.getElementById('lbl-amount').textContent = t.amount;
+      document.getElementById('lbl-purpose').textContent = t.purpose;
+      document.getElementById('lbl-pochi').textContent = t.primary;
+      document.getElementById('lbl-mpesa').textContent = t.mpesa;
+      document.getElementById('lbl-chama').textContent = t.chama;
+      document.getElementById('hint-primary').textContent = t.hintP;
+      document.getElementById('btn-back3').textContent = t.back;
+      document.getElementById('btn-run').textContent = t.run;
+      document.getElementById('h-reason').textContent = t.hReason;
+      document.getElementById('h-officer').textContent = t.hOff;
+      document.getElementById('hint-officer').textContent = t.hintOff;
+      document.getElementById('d-ok').textContent = t.ok;
+      document.getElementById('d-co').textContent = t.co;
+      document.getElementById('d-no').textContent = t.no;
+      document.getElementById('btn-again').textContent = t.again;
+      document.getElementById('btn-restart').textContent = t.restart;
     }
-    try {
-      const saved = localStorage.getItem('pride-lang');
-      if (saved === 'sw' || saved === 'en') setTimeout(() => setUILang(saved), 0);
-    } catch(e) {}
-
-    function sendOtp() {
-      otpSent = true;
-      otpVerified = false;
-      const dict = I18N[uiLang];
-      document.getElementById('otp-status').textContent = dict.otp_sent;
-    }
-    function checkOtp() {
-      const code = (document.getElementById('otp-code').value || '').trim();
-      if (!otpSent) return false;
-      if (code.length >= 4) { otpVerified = true; return true; }
-      return false;
-    }
-
-    function updateDocChecklist() {
-      const type = document.getElementById('app-type').value;
-      const reg = document.getElementById('biz-reg').value;
-      const items = [];
-      items.push(['National ID / Passport + photo', true]);
-      items.push(['Individual KRA PIN', true]);
-      items.push(['Phone + OTP verification', otpVerified]);
-      items.push(['Loan purpose', true]);
-      if (type !== 'individual') {
-        items.push(['Business location', !!(document.getElementById('location').value || '').trim()]);
-        items.push(['Call-report referee', !!(document.getElementById('call-contact').value || '').trim()]);
-      }
-      if (reg === 'yes') {
-        items.push(['Business KRA PIN', !!(document.getElementById('biz-kra').value || '').trim()]);
-        if (type === 'limited') {
-          items.push(['CR12', !!(document.getElementById('cr12').value || '').trim()]);
-          items.push(['Certificate of incorporation', !!(document.getElementById('coi').value || '').trim()]);
-        }
-      }
-      const el = document.getElementById('doc-checklist');
-      if (!el) return;
-      el.innerHTML = items.map(([name, ok]) =>
-        `<div class="doc-check ${ok ? 'ok' : 'miss'}">${ok ? '✓' : '○'} ${name}</div>`
-      ).join('');
-    }
-
-    function setStatus(n) {
-      appStatus = n;
-      for (let i = 1; i <= 6; i++) {
-        const s = document.getElementById('st-' + i);
-        if (!s) continue;
-        s.classList.toggle('on', i === n);
-        s.classList.toggle('done', i < n);
-      }
-    }
-
-    function refreshFees() {
-      const amount = parseInt(document.getElementById('amount').value, 10) || 0;
-      const bor = Math.round(amount * 0.05);
-      const fin = Math.round(amount * 0.05);
-      document.getElementById('fc-amount').textContent = 'KES ' + amount.toLocaleString();
-      document.getElementById('fc-bor').textContent = 'KES ' + bor.toLocaleString();
-      document.getElementById('fc-fin').textContent = 'KES ' + fin.toLocaleString();
-      document.getElementById('fc-net').textContent = 'KES ' + (amount - bor).toLocaleString();
-    }
-
-    function submitAppeal() {
-      const dict = I18N[uiLang];
-      document.getElementById('appeal-status').textContent = dict.appeal_ok;
-      setStatus(3);
-    }
-
-    function exportAudit() {
-      const data = Object.assign({
-        exportedAt: new Date().toISOString(),
-        sandbox: true,
-        consents: {
-          kyc: !!(document.getElementById('c-kyc') || {}).checked,
-          financial: !!(document.getElementById('c-fin') || {}).checked,
-          crb: !!(document.getElementById('c-crb') || {}).checked,
-          terms: !!(document.getElementById('c-tc') || {}).checked
-        },
-        applicant: (document.getElementById('full-name') || {}).value,
-        score: lastScore,
-        tier: lastTier,
-        decision: lastDecision,
-        statusStep: appStatus
-      }, lastAudit);
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'pride-lead-audit-demo.json';
-      a.click();
-    }
-
-    function financierAct() {
-      const act = document.getElementById('fin-action').value;
-      document.getElementById('fin-status').textContent = 'Recorded: ' + act + ' (demo)';
-      if (act.includes('Accept')) setStatus(5);
-    }
-
-    document.getElementById('app-type').addEventListener('change', updateDocChecklist);
-    document.getElementById('biz-reg').addEventListener('change', () => { toggleRegFields(); updateDocChecklist(); });
-    ['location','call-contact','biz-kra','cr12','coi','otp-code'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', updateDocChecklist);
-    });
-    setTimeout(updateDocChecklist, 100);
-    setTimeout(refreshFees, 100);
-    setStatus(1);
 
     function toggleNight() {
       document.body.classList.toggle('night');
-      const on = document.body.classList.contains('night');
-      document.getElementById('theme-btn').textContent = on ? '☀️ Day' : '🌙 Night';
-      try { localStorage.setItem('pride-night', on ? '1' : '0'); } catch(e) {}
-    }
-    try {
-      if (localStorage.getItem('pride-night') === '1') {
-        document.body.classList.add('night');
-        const b = document.getElementById('theme-btn');
-        if (b) b.textContent = '☀️ Day';
-      }
-    } catch(e) {}
-
-    function setupChamaJournal() {
-      const sel = document.getElementById('chama-journal');
-      if (!sel) return;
-      sel.addEventListener('change', () => {
-        const v = sel.value;
-        document.getElementById('chama-summary').style.display = v === 'summary' ? 'block' : 'none';
-        document.getElementById('chama-upload').style.display = v === 'upload' ? 'block' : 'none';
-      });
-    }
-    setupChamaJournal();
-
-    function consentsOk() {
-      return ['c-kyc','c-fin','c-crb','c-tc'].every(id => {
-        const el = document.getElementById(id);
-        return el && el.checked;
-      });
+      document.getElementById('btn-night').textContent = document.body.classList.contains('night') ? 'Day' : 'Night';
     }
 
-    async function runWorkflow() {
-      if (!consentsOk()) {
-        alert('Please accept all four consents under the "Consent & T&Cs" tab before running decisioning. This is required under Kenya DPA 2019.');
-        switchTab('consent');
-        return;
+    document.getElementById('agree').addEventListener('change', function(e) {
+      document.getElementById('btn-next1').disabled = !e.target.checked;
+    });
+
+    function goStep(n) {
+      for (var i = 1; i <= 4; i++) {
+        document.getElementById('step-' + i).classList.toggle('hidden', i !== n);
+        var pill = document.getElementById('pill-' + i);
+        pill.classList.toggle('on', i === n);
+        pill.classList.toggle('done', i < n);
       }
-      const t0 = performance.now();
-      resetUI();
-      document.getElementById('btn-run').disabled = true;
-      runs++;
-      document.getElementById('m-r').textContent = runs;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      const trade = document.getElementById('trade').value === 'other'
-        ? (document.getElementById('trade-other').value || 'Other trade')
-        : document.getElementById('trade').value;
-      const amount = parseInt(document.getElementById('amount').value, 10) || 0;
-      const pochi = parseInt(document.getElementById('pochi').value, 10) || 0;
-      const till = parseInt(document.getElementById('till').value, 10) || 0;
-      const paybill = parseInt(document.getElementById('paybill').value, 10) || 0;
-      const bank = parseInt(document.getElementById('bank').value, 10) || 0;
-      const mpesa = parseInt(document.getElementById('mpesa').value, 10) || 0;
-      const primaryCash = pochi + till + paybill + bank;
-      const outliers = document.getElementById('mpesa-outliers').value;
-      const chama = document.getElementById('chama').value;
-      const crb = document.getElementById('crb').value;
-      const sasra = document.getElementById('sasra').value;
-      const dpa = document.getElementById('dpa').value;
-      const bias = document.getElementById('bias').value;
-      const collateral = document.getElementById('collateral').value;
-      const lang = document.getElementById('lang').value;
-      const name = document.getElementById('full-name').value || 'Applicant';
-      const purpose = document.getElementById('loan-purpose').value;
-      const location = document.getElementById('location').value.trim();
-      const callContact = document.getElementById('call-contact').value.trim();
-      const appType = document.getElementById('app-type').value;
-      const idNumber = document.getElementById('id-number').value.trim();
-      const kra = document.getElementById('kra-pin').value.trim();
+    var delay = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
 
-      log('=== WORKFLOW INITIATED ===', 'lm');
-      log('[Consent] KYC + financial + CRB + T&Cs accepted · DPA 2019 basis recorded', 'lg');
-      setStatus(3);
-      log(`Applicant: ${name} · ${trade} · KES ${amount.toLocaleString()} · Purpose: ${purpose}`, 'li');
-      log(`Primary cashflow (Pochi+Till+Paybill+Bank): KES ${primaryCash.toLocaleString()}/mo · M-Pesa secondary: KES ${mpesa.toLocaleString()}/mo`, 'li');
+    function setFlow(id, state) {
+      var el = document.getElementById('f-' + id);
+      el.classList.remove('on', 'done', 'fail');
+      if (state) el.classList.add(state);
+    }
 
-      // KYC completeness
-      await delay(300);
-      log('--- PRE-CHECK: KYC & briefcase controls ---', 'lm');
-      const kycGaps = [];
-      if (!idNumber) kycGaps.push('National ID / Passport');
-      if (!kra) kycGaps.push('KRA PIN');
-      if (!location && appType !== 'individual') kycGaps.push('Business location');
-      if (!callContact) kycGaps.push('Call-report referee');
-      if (kycGaps.length) {
-        log(`[KYC] Incomplete: ${kycGaps.join(', ')} — officer must complete before disbursement`, 'lw');
-      } else {
-        log('[KYC] ID, KRA PIN, location & call-report contact present', 'lg');
-      }
+    async function runAgents() {
+      goStep(4);
+      var box = document.getElementById('reasoning');
+      box.innerHTML = '';
+      document.getElementById('officer-box').classList.add('hidden');
+      document.getElementById('final-msg').classList.add('hidden');
+      ['k','h','u','o'].forEach(function(id) { setFlow(id, ''); });
 
-      // ── KIBURI ──
+      var name = document.getElementById('name').value || 'Applicant';
+      var trade = document.getElementById('trade').value;
+      var amount = parseInt(document.getElementById('amount').value, 10) || 0;
+      var purpose = document.getElementById('purpose').value;
+      var primary = parseInt(document.getElementById('primary').value, 10) || 0;
+      var mpesa = parseInt(document.getElementById('mpesa').value, 10) || 0;
+      var chama = document.getElementById('chama').value;
+      var t = T[lang];
+
+      setFlow('k', 'on');
+      await delay(450);
+
+      var pRatio = Math.min(1, primary / Math.max(amount, 1));
+      var mRatio = Math.min(1, mpesa / Math.max(amount, 1));
+      var pPts = Math.round(pRatio * 50);
+      var mPts = Math.round(mRatio * 20);
+      var cPts = chama.indexOf('3+') >= 0 ? 20 : chama.indexOf('1') >= 0 ? 12 : chama.indexOf('Less') >= 0 ? 5 : 0;
+      var tradePts = /food|mama|tailor|boda|agri|mechanic|carpenter/i.test(trade) ? 8 : 4;
+      var score = Math.min(100, Math.max(8, pPts + mPts + cPts + tradePts));
+      var tier = score >= 70 ? (lang === 'sw' ? 'Hatari ndogo' : 'Low risk')
+        : score >= 50 ? (lang === 'sw' ? 'Hatari ya wastani' : 'Medium risk')
+        : (lang === 'sw' ? 'Hatari kubwa' : 'High risk');
+      var conv = primary > 0 ? (amount / primary).toFixed(1) : '—';
+
+      var kThink = lang === 'sw'
+        ? 'Ninatazama mtiririko mkuu (Pochi/Till/Benki): KES ' + primary.toLocaleString() + '/mwezi → alama ' + pPts + '/50.\nM-Pesa (ya pili): KES ' + mpesa.toLocaleString() + ' → alama ' + mPts + '/20.\nChama: ' + chama + ' → alama ' + cPts + '/20.\nAina ya kazi (' + trade + ') → alama ' + tradePts + '.\n\nJumla: ' + score + '/100 · ' + tier + '.\nMkopo ni takriban ×' + conv + ' ya mtiririko wa mwezi (tunapendelea mtiririko, si dhamana pekee).'
+        : 'I am reading primary cashflow (Pochi / Till / Bank): KES ' + primary.toLocaleString() + '/mo → ' + pPts + ' points out of 50.\nM-Pesa (secondary): KES ' + mpesa.toLocaleString() + ' → ' + mPts + ' / 20.\nChama: ' + chama + ' → ' + cPts + ' / 20.\nTrade type (' + trade + ') → ' + tradePts + ' points.\n\nTotal score: ' + score + '/100 · ' + tier + '.\nLoan is about ' + conv + '× monthly primary cashflow. We prefer cashflow strength over collateral alone.';
+
+      box.innerHTML += '<div class="agent-block k"><h3>' + t.kTitle + '</h3><div class="think">' + kThink + '</div><p class="score-big" style="margin-top:8px">' + score + '<span style="font-size:14px;font-weight:600;color:var(--muted)"> / 100</span></p></div>';
+      setFlow('k', 'done');
+      await delay(550);
+
+      setFlow('h', 'on');
       await delay(400);
-      setFlow('k', 'active', 'Scoring...');
-      log('--- STEP 1: Kiburi (Credit Scout) ---', 'lm');
-      log('[Kiburi] Ingesting primary sources: Pochi la Biashara, Till, Paybill, Bank...', 'lg');
-      await delay(350);
-      log('[Kiburi] Secondary: M-Pesa statement (outlier scan)...', 'lg');
-      await delay(300);
+      var issues = [];
+      if (score < 40) issues.push(lang === 'sw' ? 'Alama ya chini sana' : 'Very low score');
+      if (primary < amount * 0.25 && mpesa > primary * 2) issues.push(lang === 'sw' ? 'M-Pesa inaonekana juu kuliko mtiririko mkuu — niache afisa aulize' : 'M-Pesa much higher than primary cashflow — officer should ask why');
+      if (amount > primary * 4 && primary > 0) issues.push(lang === 'sw' ? 'Mkopo mkubwa sana ikilinganishwa na mtiririko wa mwezi' : 'Loan large vs monthly cashflow');
+      var pause = issues.length > 0;
 
-      // Primary-weighted scoring
-      const primaryRatio = Math.min(1, primaryCash / Math.max(amount, 1));
-      const primaryPts = Math.round(primaryRatio * 48);
-      const mpesaRatio = Math.min(1, mpesa / Math.max(amount, 1));
-      const mpesaPts = Math.round(mpesaRatio * 18);
-      const chamaPts = chama.includes('3+') ? 18 : chama.includes('1–3') ? 12 : chama.includes('<') ? 6 : 0;
-      const agriBoost = trade.toLowerCase().includes('agri') ? 6 : 0;
-      const tradeBoost = /food|mama|tailor|boda|mechanic|carpenter|mason|salon|fish/i.test(trade) ? 5 : 3;
-      let outlierPenalty = 0;
-      if (outliers === 'spike' || outliers === 'third') outlierPenalty = 12;
-      else if (outliers === 'round' || outliers === 'night') outlierPenalty = 8;
-      const noise = Math.floor(Math.random() * 5);
-      let scoreRaw = Math.min(100, Math.max(5, primaryPts + mpesaPts + chamaPts + tradeBoost + agriBoost + noise - outlierPenalty));
-      lastScore = scoreRaw;
-      const tier = scoreRaw >= 70 ? 'Low Risk' : scoreRaw >= 50 ? 'Medium Risk' : 'High Risk';
-      lastTier = tier;
+      var hThink = lang === 'sw'
+        ? 'Ninakagua utiifu na hatari.\n• Idhini ya data: imetolewa katika hatua ya masharti.\n• Hakuna sehemu ya ubaguzi (GUARD) katika data hii.\n• Msisitizo: mtiririko wa fedha kwanza, si dhamana.\n' + (pause ? '• Pausi (PRIDE Loop): ' + issues.join('; ') : '• Hakuna kizuizi kikubwa — naendelea kwa Uamuzi.')
+        : 'I check compliance and risk flags.\n• Data consent: given at Terms step.\n• No bias proxy fields in this payload (GUARD clear).\n• Policy: cashflow-first, not security-first.\n' + (pause ? '• PRIDE Loop pause: ' + issues.join('; ') : '• No hard block — forwarding to Uamuzi.');
 
-      const conversion = amount > 0 && primaryCash > 0
-        ? (amount / primaryCash).toFixed(1)
-        : 'n/a';
-      log(`[Kiburi] Score: ${scoreRaw}/100 · Tier: ${tier}`, scoreRaw >= 70 ? 'lg' : scoreRaw >= 50 ? 'lw' : 'le');
-      log(`[Kiburi] Breakdown → Primary cashflow: ${primaryPts} · M-Pesa: ${mpesaPts} · Chama: ${chamaPts} · Trade: ${tradeBoost + agriBoost} · Outlier penalty: -${outlierPenalty}`, 'li');
-      log(`[Kiburi] Conversion view: loan ≈ ${conversion}× monthly primary cashflow (cashflow-first, not security-first)`, 'li');
+      box.innerHTML += '<div class="agent-block h"><h3>' + t.hTitle + '</h3><div class="think">' + hThink + '</div></div>';
+      setFlow('h', pause ? 'fail' : 'done');
+      await delay(550);
 
-      if (outliers !== 'none') {
-        log(`[Kiburi] ⚠ M-Pesa outlier flagged: ${outliers} — officer should ask source of funds / business activity`, 'lw');
-      }
-
-      showScore(scoreRaw, tier, `
-        <span>Primary (Pochi/Till/Bank/Paybill)</span><span>${primaryPts}</span>
-        <span>M-Pesa secondary</span><span>${mpesaPts}</span>
-        <span>Chama tenure</span><span>${chamaPts}</span>
-        <span>Trade / agri signal</span><span>${tradeBoost + agriBoost}</span>
-        <span>Outlier penalty</span><span>-${outlierPenalty}</span>
-        <span>Conversion (loan / primary mo.)</span><span>${conversion}×</span>
-      `);
-
-      log('[Kiburi] Payload sealed → Hekima', 'lg');
-      setFlow('k', 'done', 'Complete');
-
-      // ── HEKIMA ──
-      await delay(350);
-      setFlow('h', 'active', 'Guarding...');
-      log('--- STEP 2: Hekima (Risk Guardian) ---', 'lm');
-
-      // GUARD bias
-      if (bias.includes('Proxy')) {
-        log('[GUARD] ⛔ Gender / protected-class proxy field in scoring payload', 'le');
-        log('[GUARD] Payload BLOCKED · Ethics Committee notified · TRACK audit written', 'le');
-        document.getElementById('a-guard').classList.add('show');
-        setFlow('h', 'fail', 'Blocked');
-        blocks++;
-        document.getElementById('m-b').textContent = blocks;
-        document.getElementById('btn-run').disabled = false;
-        document.getElementById('m-t').textContent = ((performance.now() - t0) / 1000).toFixed(1);
-        return;
-      }
-
-      // DPA
-      if (dpa.includes('Missing')) {
-        log('[Hekima] ⛔ Kenya DPA 2019 consent missing — cannot process personal data', 'le');
-        document.getElementById('a-guard').classList.add('show');
-        setFlow('h', 'fail', 'DPA block');
-        blocks++;
-        document.getElementById('m-b').textContent = blocks;
-        document.getElementById('btn-run').disabled = false;
-        document.getElementById('m-t').textContent = ((performance.now() - t0) / 1000).toFixed(1);
-        return;
-      }
-
-      // SASRA hard block
-      if (sasra.includes('Breach')) {
-        log('[Hekima] ⛔ SASRA capital / policy breach — hard stop', 'le');
-        document.getElementById('a-guard').classList.add('show');
-        setFlow('h', 'fail', 'SASRA block');
-        blocks++;
-        document.getElementById('m-b').textContent = blocks;
-        document.getElementById('btn-run').disabled = false;
-        document.getElementById('m-t').textContent = ((performance.now() - t0) / 1000).toFixed(1);
-        return;
-      }
-
-      // CRB + briefcase heuristics
-      let pause = false;
-      const pauseReasons = [];
-      if (crb === 'active') {
-        pause = true;
-        pauseReasons.push('CRB active non-performing listing');
-        log('[Hekima] CRB: active NPL — PRIDE Loop pause recommended', 'lw');
-      } else if (crb === 'mild') {
-        log('[Hekima] CRB: mild historical defaults (settled) — disclose to officer', 'lw');
-      } else if (crb === 'clear') {
-        log('[Hekima] CRB: clear / no adverse', 'lg');
-      } else {
-        log('[Hekima] CRB: not yet pulled — pull under consent before disbursement', 'lw');
-      }
-
-      if (!location || !callContact) {
-        pause = true;
-        pauseReasons.push('Missing location or call-report referee (briefcase control)');
-        log('[Hekima] Briefcase control: incomplete location / call-report contact', 'lw');
-      }
-      if (collateral.includes('Security-heavy')) {
-        pause = true;
-        pauseReasons.push('Security-heavy underwriting — cashflow-first policy prefers review');
-        log('[Hekima] Policy: do not lend primarily on security strength', 'lw');
-      }
-      if (sasra.includes('Near')) {
-        pause = true;
-        pauseReasons.push('SASRA near limit');
-        log('[Hekima] SASRA near limit — human review', 'lw');
-      }
-      if (outliers !== 'none' && scoreRaw < 65) {
-        pause = true;
-        pauseReasons.push('M-Pesa outliers with moderate/weak score');
-      }
-      if (kycGaps.length) {
-        pause = true;
-        pauseReasons.push('KYC gaps: ' + kycGaps.join(', '));
-      }
-
-      if (pause) {
-        log('[Hekima] ⏸ PRIDE Loop PAUSE — ' + pauseReasons.join('; '), 'lw');
-        document.getElementById('a-pause').classList.add('show');
-        setFlow('h', 'done', 'Pause');
-        blocks++;
-        document.getElementById('m-b').textContent = blocks;
-      } else {
-        log('[Hekima] Compliance OK · cashflow-first · forward to Uamuzi', 'lg');
-        setFlow('h', 'done', 'Clear');
-      }
-
-      // ── UAMUZI ──
-      await delay(350);
-      setFlow('u', 'active', 'Briefing...');
-      log('--- STEP 3: Uamuzi (Human Liaison) ---', 'lm');
+      setFlow('u', 'on');
       await delay(400);
+      var rec = score >= 70 && !pause ? (lang === 'sw' ? 'Pendekeza IDHINISHE' : 'Recommend APPROVE')
+        : score >= 50 ? (lang === 'sw' ? 'Pendekeza ofa tofauti au masharti' : 'Recommend COUNTER-OFFER or conditions')
+        : (lang === 'sw' ? 'Pendekeza KATAA au eskalisha' : 'Recommend DECLINE or escalate');
 
-      const feeBorrower = Math.round(amount * 0.05);
-      const feeFinancier = Math.round(amount * 0.05);
-      const rec = scoreRaw >= 70 && !pause ? 'Recommend APPROVE'
-        : scoreRaw >= 50 ? 'Recommend COUNTER-OFFER or conditions'
-        : 'Recommend DECLINE or escalate';
+      var uThink = lang === 'sw'
+        ? 'Muhtasari kwa afisa:\nMwombaji: ' + name + '\nKazi: ' + trade + '\nKiasi: KES ' + amount.toLocaleString() + ' · Madhumuni: ' + purpose + '\nAlama: ' + score + '/100 (' + tier + ')\nMtiririko mkuu: KES ' + primary.toLocaleString() + '/mwezi\n' + (pause ? 'Pausi: ' + issues.join('; ') + '\n' : '') + 'Pendekezo: ' + rec + '\n\nUamuzi wa mwisho ni wa AFISA BINADAMU.'
+        : 'Briefing for the officer:\nApplicant: ' + name + '\nTrade: ' + trade + '\nAmount: KES ' + amount.toLocaleString() + ' · Purpose: ' + purpose + '\nScore: ' + score + '/100 (' + tier + ')\nPrimary monthly cashflow: KES ' + primary.toLocaleString() + '\n' + (pause ? 'Pause notes: ' + issues.join('; ') + '\n' : '') + 'Recommendation: ' + rec + '\n\nFINAL DECISION rests with the HUMAN OFFICER.';
 
-      let brief = '';
-      if (lang === 'Swahili') {
-        brief = `MUHTASARI WA AFIISA\nMwombaji: ${name}\nBiashara: ${trade}\nKiasi: KES ${amount.toLocaleString()}\nMadhumuni: ${purpose}\nAlama: ${scoreRaw}/100 (${tier})\nMtiririko mkuu: KES ${primaryCash.toLocaleString()}/mwezi\nCRB: ${crb}\nMapendekezo: ${rec}\nAda jukwaa: 5% mwombaji + 5% mfadhili (escrow)\nUamuzi wa mwisho: AFIISA ALIYELICENSIWA.`;
-      } else if (lang === 'Dholuo') {
-        brief = `WACH NE JAGORO\nNg'ama kwayo: ${name}\nTich: ${trade}\nPesa: KES ${amount.toLocaleString()}\nGima dwaro: ${purpose}\nScore: ${scoreRaw}/100 (${tier})\nPesa madonjo: KES ${primaryCash.toLocaleString()}/dwe\nCRB: ${crb}\nLamo: ${rec}\nTo: 5% + 5% (escrow)\nNg'ato ma chiwo duoko: JAGORO MA NGI LICENSE.`;
-      } else {
-        brief = `OFFICER BRIEFING\nMember: ${name}\nTrade: ${trade}\nAmount: KES ${amount.toLocaleString()}\nPurpose: ${purpose}\nScore: ${scoreRaw}/100 · ${tier}\nPrimary monthly cashflow: KES ${primaryCash.toLocaleString()}\nConversion: loan ≈ ${conversion}× monthly primary cashflow\nM-Pesa outliers: ${outliers === 'none' ? 'None' : outliers}\nCRB: ${crb}\nKYC gaps: ${kycGaps.length ? kycGaps.join(', ') : 'None'}\nCall-report contact: ${callContact || '—'}\nRecommendation: ${rec}\nPlatform fee: 5% borrower (KES ${feeBorrower.toLocaleString()}) + 5% financier (KES ${feeFinancier.toLocaleString()}) via escrow\nFINAL DECISION: LICENSED HUMAN OFFICER.`;
-      }
-
-      document.getElementById('brief').textContent = brief;
-      document.getElementById('brief').classList.add('show');
-      document.getElementById('bhead').style.display = 'block';
-      log('[Uamuzi] Briefing prepared · ' + lang + ' · delivered to officer desk', 'lg');
-      setFlow('u', 'done', 'Briefed');
-
-      const payload = {
-        applicant: name,
-        trade,
-        amount,
-        purpose,
-        score: scoreRaw,
-        tier,
-        primaryCashflow: primaryCash,
-        mpesaSecondary: mpesa,
-        outliers,
-        conversion: conversion + 'x',
-        crb,
-        kycGaps,
-        pause: pause,
-        pauseReasons,
-        fees: { borrowerPct: 5, financierPct: 5, borrowerKes: feeBorrower, financierKes: feeFinancier },
-        escrow: true,
-        principle: 'cashflow-first-not-security'
-      };
-      document.getElementById('payload').textContent = JSON.stringify(payload, null, 2);
-      document.getElementById('payload').classList.add('show');
-
-      setFlow('o', 'active', 'Your decision');
-      document.getElementById('a-ok').classList.add('show');
-      document.getElementById('officer-panel').classList.add('show');
-      waitingOfficer = true;
-      document.getElementById('m-t').textContent = ((performance.now() - t0) / 1000).toFixed(1);
-      document.getElementById('btn-run').disabled = false;
+      box.innerHTML += '<div class="agent-block u"><h3>' + t.uTitle + '</h3><div class="think">' + uThink + '</div></div>';
+      setFlow('u', 'done');
+      setFlow('o', 'on');
+      document.getElementById('officer-box').classList.remove('hidden');
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
 
-    function officerDecide(action) {
-      if (!waitingOfficer) return;
-      waitingOfficer = false;
-      document.querySelectorAll('.obtn').forEach(b => b.disabled = true);
-      decisions++;
-      document.getElementById('m-a').textContent = decisions;
-      setFlow('o', 'done', action);
-      lastDecision = action;
-      setStatus(action === 'approve' ? 5 : 4);
-      const br = document.getElementById('brief');
-      const fv = document.getElementById('fin-brief-view');
-      if (br && fv) fv.textContent = br.textContent;
-      lastAudit = { action, score: lastScore, tier: lastTier, at: new Date().toISOString() };
-      refreshFees();
-      const map = {
-        approve: 'APPROVED — route to matched financier · escrow funding',
-        counter: 'COUNTER-OFFER — adjust amount / tenor · re-brief',
-        decline: 'DECLINED — adverse action notice + appeal path',
-        escalate: 'ESCALATED — Ethics Committee / senior credit'
+    function decide(action) {
+      setFlow('o', 'done');
+      var map = {
+        approve: lang === 'sw' ? 'Umeidhinisha. Katika mfumo halisi, ombi lingeendelea kwa mkopeshaji aliyeidhinishwa.' : 'You approved. In production this would proceed to a licensed lender.',
+        counter: lang === 'sw' ? 'Ofa tofauti. Unaweza kurekebisha kiasi au muda kisha kuendesha tena.' : 'Counter-offer. Adjust amount or terms, then run again if needed.',
+        decline: lang === 'sw' ? 'Umekataa. Mwombaji anastahili sababu wazi na njia ya rufaa.' : 'Declined. The applicant should get a clear reason and an appeal path.'
       };
-      log(`[Officer] Decision: ${map[action] || action}`, action === 'approve' ? 'lg' : action === 'decline' ? 'le' : 'lw');
-      if (action === 'approve') {
-        log('[Marketplace] Match financier → escrow hold → release after final KYC/call-report', 'lg');
-        log('[Fees] 5% borrower + 5% financier on disbursement', 'li');
-      }
+      var el = document.getElementById('final-msg');
+      el.textContent = map[action];
+      el.classList.remove('hidden');
+      document.getElementById('officer-box').classList.add('hidden');
     }
 
-    // init
-    toggleRegFields();
+    setLang('en');
   </script>
 </body>
 </html>
